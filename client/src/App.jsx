@@ -6,12 +6,14 @@ import Home from './pages/Home'
 import Navbar from './components/Navbar'
 import ClassRooms from './pages/ClassRooms'
 
+import faceImg from './assets/home-img.jpeg'
+
 function App() {
 
   return (
     <>
-      <div className='w-screen h-screen bg-red-100'>
-        <Navbar/>
+      <div className='min-h-screen p-6' >
+        {/* <Navbar/> */}
         <Routes>
           <Route path='/' element={<Home/>} />
           <Route path='/classrooms' element={<ClassRooms/>}/>
