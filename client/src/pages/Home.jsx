@@ -49,7 +49,8 @@ const Home = () => {
         </div>
       </div>
 
-      <div className='h-screen bg-cover bg-center bg-amber-300'
+      {/* Feature Section */}
+      <div className='h-full pb-16 bg-cover bg-center bg-amber-300'
         style={{backgroundImage: `url(${featBg})`}}>
         {/* <div className="w-full h-full bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center px-4"> */}
         <div className="max-w-6xl mx-auto -mt-8 sm:-mt-8 md:-mt-16 lg:-mt-24 mb-8 px-4 py-12 pb-18 bg-white/80 backdrop-blur-sm rounded-4xl shadow-xl flex flex-col items-center justify-center z-20 relative">
@@ -90,6 +91,64 @@ const Home = () => {
           </div>
         </div>
 
+      </div>
+
+      {/* How it Works */}
+      <div className="h-full bg-cover bg-center px-6 py-22 flex flex-col items-center text-white"
+        style={{ backgroundImage: `url(${featBg})` }}
+      >
+        {/* Heading */}
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-2 drop-shadow-lg">
+          How Sahpathi Works
+        </h2>
+        <p className="text-sm md:text-base text-center text-white/90 mb-12 drop-shadow-sm">
+          Join, Learn, Teach — all in a few clicks
+        </p>
+        {/* Steps */}
+        <div className="w-full max-w-6xl my-8 flex flex-col md:flex-row justify-between items-start gap-12">
+          {/* Step 1 */}
+          <div className="relative flex-1 text-center md:text-left">
+            <div className="w-10 h-10 rounded-full bg-white text-blue-600 font-bold flex items-center justify-center mx-auto md:mx-0 mb-4 shadow z-10 relative">
+              1
+            </div>
+            <div className="hidden md:block absolute top-5 left-1/8 w-full h-0.5 bg-white/40 -z-0"></div>
+            <h3 className="text-xl font-semibold mb-2">Join a Classroom</h3>
+            <p className="text-sm text-white/90">
+              Browse or create a classroom instantly. All you need is a topic and curiosity to learn or teach.
+            </p>
+          </div>
+          {/* Step 2 */}
+          <div className="relative flex-1 text-center md:text-left">
+            <div className="w-10 h-10 rounded-full bg-white text-blue-600 font-bold flex items-center justify-center mx-auto md:mx-0 mb-4 shadow z-10 relative">
+              2
+            </div>
+            <div className="hidden md:block absolute top-5 left-1/8 w-full h-0.5 bg-white/40 -z-0"></div>
+            <h3 className="text-xl font-semibold mb-2">Collaborate Live</h3>
+            <p className="text-sm text-white/90">
+              Use real-time audio and canvas tools to ask questions, explain concepts, and learn together.
+            </p>
+          </div>
+          {/* Step 3 */}
+          <div className="relative flex-1 text-center md:text-left">
+            <div className="w-10 h-10 rounded-full bg-white text-blue-600 font-bold flex items-center justify-center mx-auto md:mx-0 mb-4 shadow z-10 relative">
+              3
+            </div>
+            <div className="hidden md:block absolute top-5 left-1/8 w-full h-0.5 bg-white/40 -z-0"></div>
+            <h3 className="text-xl font-semibold mb-2">Grow & Repeat</h3>
+            <p className="text-sm text-white/90">
+              Build connections, gain experience, and continue your journey of learning and mentoring every day.
+            </p>
+          </div>
+        </div>
+        <button className="mt-12 bg-white text-blue-600 font-semibold px-6 py-3 rounded-md hover:bg-white/90 transition">
+          Start Learning
+        </button>
+      </div>
+
+      {/* Testimonials */}
+      <div className='h-screen bg-cover bg-center bg-amber-300'
+        style={{backgroundImage: `url(${faceImg})`}}>
+        {/* code here */}
       </div>
     </div>
   );

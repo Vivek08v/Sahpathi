@@ -1,0 +1,9 @@
+2) Features:
+🎯 Live Classrooms with Voice + Whiteboard  
+🧑‍🏫 Request to Teach & Join Classrooms  
+📋 Track Sessions & Notifications  
+🧠 AI Doubt Assistant (if implemented)  
+📂 Resource Sharing — PDFs, Links, Notes  
+
+3) How it works
+4) Testimonials
