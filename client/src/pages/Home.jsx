@@ -1,8 +1,15 @@
-import faceImg from '../assets/home-img.jpeg'
+import Navbar from '../components/Navbar';
+
 import lineBg from '../assets/line-bg.jpg'
 import heroSecImg from '../assets/heroSecImg.png'
+import testiImg from '../assets/img4.jpg'
 import featBg from '../assets/feat-bg.jpg'
-import Navbar from '../components/Navbar';
+import img1 from '../assets/useCase_Images/1.png'
+import img2 from '../assets/useCase_Images/2.png'
+import img3 from '../assets/useCase_Images/3.png'
+import img4 from '../assets/useCase_Images/4.jpg'
+import img5 from '../assets/useCase_Images/5.jpg'
+import img6 from '../assets/useCase_Images/6.jpg'
 
 const Home = () => {
   return (
@@ -20,7 +27,6 @@ const Home = () => {
 
         {/* Hero Section */}
         <div className="flex flex-col md:flex-row items-center justify-between mt-12 sm:mt-24 md:mt-24 lg:mt-36 px-4 sm:px-6 md:px-10 lg:px-16 gap-4 sm:gap-6 lg:gap-12">
-          {/* Left Text Content */}
           <div className="flex-1 max-w-xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 drop-shadow-lg text-left">
               Collaborative Learning Redefined
@@ -38,7 +44,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Right Image */}
           <div className="flex-1 flex justify-center">
             <img
               src={heroSecImg}
@@ -57,7 +62,6 @@ const Home = () => {
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">Supercharge Your Learning</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full">
-            {/* Feature 1 */}
             <div className="bg-yellow-100 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-200">
               <p className="text-sm font-semibold text-yellow-800 mb-2">Live Classrooms</p>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Collaborate in Real-Time</h3>
@@ -65,7 +69,6 @@ const Home = () => {
               <button className="text-sm font-medium text-yellow-800 hover:underline">Join Now →</button>
             </div>
 
-            {/* Feature 2 */}
             <div className="bg-blue-100 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-200">
               <p className="text-sm font-semibold text-blue-800 mb-2">Mentorship Model</p>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Learn from the Best</h3>
@@ -73,7 +76,6 @@ const Home = () => {
               <button className="text-sm font-medium text-blue-800 hover:underline">Become a Mentor →</button>
             </div>
 
-            {/* Feature 3 */}
             <div className="bg-purple-100 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-200">
               <p className="text-sm font-semibold text-purple-800 mb-2">Smart Scheduling</p>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Plan Your Sessions</h3>
@@ -81,7 +83,6 @@ const Home = () => {
               <button className="text-sm font-medium text-purple-800 hover:underline">Check Schedule →</button>
             </div>
 
-            {/* Feature 4 */}
             <div className="bg-green-100 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-200">
               <p className="text-sm font-semibold text-green-800 mb-2">Explore Topics</p>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Broaden Your Knowledge</h3>
@@ -97,14 +98,12 @@ const Home = () => {
       <div className="h-full bg-cover bg-center px-6 py-22 flex flex-col items-center text-white"
         style={{ backgroundImage: `url(${featBg})` }}
       >
-        {/* Heading */}
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-2 drop-shadow-lg">
           How Sahpathi Works
         </h2>
         <p className="text-sm md:text-base text-center text-white/90 mb-12 drop-shadow-sm">
           Join, Learn, Teach — all in a few clicks
         </p>
-        {/* Steps */}
         <div className="w-full max-w-6xl my-8 flex flex-col md:flex-row justify-between items-start gap-12">
           {/* Step 1 */}
           <div className="relative flex-1 text-center md:text-left">
@@ -146,10 +145,72 @@ const Home = () => {
       </div>
 
       {/* Testimonials */}
-      <div className='h-screen bg-cover bg-center bg-amber-300'
-        style={{backgroundImage: `url(${faceImg})`}}>
-        {/* code here */}
+      <div className='h-full bg-cover bg-center bg-amber-300'
+        style={{backgroundImage: `url(${testiImg})`}}>
+        <div className="py-20 px-4 text-center">
+          <h2 className="text-white text-3xl font-bold mb-4">Real learning. Real collaboration. Real impact.</h2>
+          <p className="text-gray-400 mb-12">
+            Experience the moments that make Sahpathi more than just a platform — 
+            it’s a community of learners in action.
+          </p>
+
+          <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
+            {[
+              { src: img1, caption: "Live Classroom in Session" },
+              { src: img3, caption: "Collaborative Whiteboard" },
+              { src: img4, caption: "Interactive Chat with Peers" },
+              { src: img5, caption: "Mentor Profiles & Scheduling" },
+              { src: img2, caption: "Student Learning Dashboard" },
+              { src: img6, caption: "Feedback from Mentors" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="rounded-lg overflow-hidden shadow hover:scale-105 transition-transform duration-300 bg-gray-50"
+              >
+                <img
+                  src={item.src}
+                  alt={item.caption}
+                  className="w-full h-56 object-cover"
+                />
+                <p className="mt-2 text-sm text-gray-600">{item.caption}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+      
+      {/* Call To Action */}
+      <div className='h-full bg-cover bg-center bg-amber-300'
+        style={{backgroundImage: `url(${lineBg})`}}>
+        <div className="text-white py-12 text-center px-4">
+          <h2 className="text-3xl font-bold mb-4">Ready to start your journey?</h2>
+          <p className="mb-6 text-lg">Join Sahpathi today as a learner or mentor and make every session count.</p>
+          <div className="flex justify-center gap-4 flex-wrap">
+            <button className="bg-white text-blue-600 px-6 py-3 rounded-md font-medium hover:bg-gray-100">Get Started</button>
+            <button className="bg-white/10 border border-white px-6 py-3 rounded-md font-medium hover:bg-white/20">Learn More</button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className='h-full bg-cover bg-center bg-amber-300'
+        style={{backgroundImage: `url(${featBg})`}}>
+        <div className="text-white py-10 px-4">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-2">Sahpathi</h3>
+              <p className="text-sm text-white/80">Empowering collaborative learning for everyone.</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <a href="#" className="hover:underline">About</a>
+              <a href="#" className="hover:underline">Contact</a>
+              <a href="#" className="hover:underline">Terms</a>
+              <a href="#" className="hover:underline">Privacy</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };
