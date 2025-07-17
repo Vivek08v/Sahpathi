@@ -8,6 +8,7 @@ class Room {
         this.creatorId = creatorId;
         this.peers = new Map();
         // to be added
+        // Handle Transport, producers, teacher etc
         this.router = null;
         this.mediaCodecs = config.mediasoup.router.mediaCodecs;
     }
@@ -36,5 +37,32 @@ class Room {
             console.error('Error while creating room: ', error);
             throw error;
         }
+    }
+
+    addPeer(peerId, name, role){
+        if(this.peers.has(peerId)){
+            return this.peers.get(peerId);
+        }
+
+        this.peers.set(peerId, {
+            id: peerId,
+            name,
+            role,
+            // 
+            isConnected: false
+        });
+
+       //
+
+       return this.peers.get(peerId);
+    }
+
+    removePeer(peerId) {
+        if(!this.peers.has(peerId)) return;
+
+        const peer = this.peers.get(peerId);
+
+        this.peers.delete(peerId);
+        console.log("Peer: ", peerId, " left the room: ", this.title);
     }
 }
