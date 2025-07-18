@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-
-const app = express();
+import {app, server} from './socket/socket';
+// const app = express();
 
 // middlewars
 app.use(express.json())
@@ -21,6 +21,6 @@ app.get("/", (req, res)=>{
 })
 
 // listening to server
-app.listen(4000, ()=>{
+server.listen(4000, ()=>{
     console.log("Server started at Port: 4000")
 })
