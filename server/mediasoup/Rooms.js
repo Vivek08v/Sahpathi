@@ -266,5 +266,40 @@ class Room {
             producerPaused: consumer.producerPaused
         };
     }
+
+    async resumeConsumer(consumerId) {
+        const consumer = this.consumers.get(consumerId);
+        if(!consumer) throw new Error(`Consumer with id ${consumerId} not found`);
+        await consumer.resume();
+        return true;
+    }
+
+    getTransport(transportId) {
+        return this.transports.get(transportId);
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            title: this.title,
+            creatorId: this.creatorId,
+            teacher: this.teacher,
+            isTeacherAssigned: this.isTeacherAssigned,
+            peers: Arrays.from(this.peers.values()).map(peer => ({
+                id: peer.id,
+                name: peer.name,
+                role: peer.role
+            })) 
+        }
+    }
+
+    getPeers() {
+        return Array.from(this.peers.values());
+    }
+
+    isRoomEmpty() {
+        return this.peers.size === 0;
+    }
 }
 
+module.exports = Room;

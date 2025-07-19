@@ -25,11 +25,21 @@ class RoomsManager {
     removeRoom(roomId) {
         const room = this.rooms.get(roomId);
         if(room){
-            //
+            if(room.worker) {
+                room.worker.close();
+            }
             this.rooms.delete(roomId);
             return true;
         }
         return false;
+    }
+
+    cleanUpRooms() {
+        for(const [roomId, room] of this.rooms.entries()){
+            if(room.isRoomEmpty()){
+                this.removeRoom(roomId);
+            }
+        }
     }
 }
 
