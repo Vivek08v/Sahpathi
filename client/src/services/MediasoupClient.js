@@ -61,10 +61,76 @@ class MediasoupClient {
                 this.role = role;
 
                 const { roomData, routerRtpCapabilities } = response;
+
+                roomData.peers.forEach(peer => {
+                    this.peers.set(peer.id, peer);
+                });
+
+                try{
+                    if(!this.device.loaded) {
+                        await this.device.load({ routerRtpCapabilities });
+                    }
+
+                    // Create Transport
+                    await this.createSendTransport();
+                    await this.createReceiveTransport();
+
+                    // Getting existing producers and consume them
+                    await this.getExistingProducers();
+
+                    console.log("socket id: ", this.peerId, "joined the room: ", roomData);
+                    resolve(roomData);
+                }
+                catch(error){
+                    reject(error);
+                }
             })
         })
     }
 
+    async createSendTransport() {
+        return new Promise((resolve, reject) => {
+            this.socket.emit('createWebRtcTransport', {roomId: this.roomId}, async (response) => {
+                if(response.error) {
+                    return reject(new Error(response.error));
+                }
+
+                try{
+                    this.producerTransport = this.device.createSendTransport(response);
+                    
+                    // connect
+                    this.producerTransport.on('connect', ({dtlsParameter}, callback, errback) => {
+                        this.socket.emit('connectWebRtcTransport', {
+                            roomId: this.roomId,
+                            transportId: this.producerTransport.id,
+                            dtlsParameters
+                        },
+                        (response) =>  {
+                            if(response.error) {
+                                errback(new Error(response.error));
+                                return;
+                            }
+
+                            callback();
+                        })
+                    })
+
+                    // produce
+                }
+                catch(err){
+                    reject(err);
+                }
+            })
+        })
+    }
+
+    async createReceiveTransport() {
+
+    }
+
+    async getExistingProducers() {
+
+    }
 
     async connectConsumer(peerId, producerId, kind){
 
