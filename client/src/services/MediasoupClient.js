@@ -99,7 +99,7 @@ class MediasoupClient {
                     this.producerTransport = this.device.createSendTransport(response);
                     
                     // connect
-                    this.producerTransport.on('connect', ({dtlsParameter}, callback, errback) => {
+                    this.producerTransport.on('connect', ({dtlsParameters}, callback, errback) => {
                         this.socket.emit('connectWebRtcTransport', {
                             roomId: this.roomId,
                             transportId: this.producerTransport.id,
