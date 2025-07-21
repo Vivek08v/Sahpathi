@@ -57,7 +57,7 @@ io.on('connection', (socket) => {
     });
 
 
-    socket.on('createWebRtcTransport', async ({roomId, transportId, dtlsParameters }, callback) => {
+    socket.on('createWebRtcTransport', async ({roomId}, callback) => {
         try{
             const room = roomsManager.getRoom(roomId);
 
@@ -89,7 +89,30 @@ io.on('connection', (socket) => {
             console.error('Error connecting WebRTC transport: ', err);
             callback({ error: err.message });
         }
-    })
+    });
+
+    socket.on('produce', async ({roomId, transportId, kind, rtpParameters, appData }, callback) => {
+        try {
+            const room = roomsManager.getRoom(roomId);
+            if(!room){
+                return callback({ error: 'Room not found' });
+            }
+
+            const producer = await room.produce(socket.id, transportId, kind, rtpParameters, appData);
+
+            socket.to(roomId).emit('newProducer', {
+                peerId: socket.id,
+                producerId: producer.id,
+                kind
+            });
+
+            callback(producer);
+        }
+        catch(error) {
+            console.log('Error producing: ', error);
+            callback({ error: error.message });
+        }
+    });
 })
 
 export {app, server, io};

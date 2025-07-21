@@ -116,16 +116,64 @@ class MediasoupClient {
                     })
 
                     // produce
+                    this.producerTransport.on('produce', ({kind, rtpParameters, appData}, callback, errback) => {
+                        this.socket.emit('produce', {
+                            roomId: this.roomId,
+                            transportId: this.producerTransport.id,
+                            kind,
+                            rtpParameters,
+                            appData
+                        }, (response) => {
+                            if(response.error){
+                                errback(new Error(response.error));
+                                return;
+                            }
+
+                            callback({ id: response.id });
+                        })
+                    });
+
+                    resolve();
                 }
                 catch(err){
                     reject(err);
                 }
-            })
+            });
         })
     }
 
     async createReceiveTransport() {
+        return new Promise((resolve, reject) => {
+            this.socket.emit('createWebRtctransport', {roomId: this.roomId}, async (response) => {
+                if(response.error){
+                    return reject(new Error(response.error));
+                }
 
+                try{
+                    this.consumerTransport = this.device.createRecvTransport(response);
+
+                    this.consumerTransport.on('connect', ({dtlsParameters}, callback, errback) => {
+                        this.socket.emit('connectWebRtcTransport', {
+                            roomId: this.roomId,
+                            transportId: this.consumerTransport.id,
+                            dtlsParameters
+                        }, (response) => {
+                            if(response.error){
+                                errback(new Error(response.error));
+                                return;
+                            }
+
+                            callback();
+                        });
+                    });
+
+                    resolve();
+                }
+                catch(error){
+                    reject(error);
+                }
+            })
+        })
     }
 
     async getExistingProducers() {
