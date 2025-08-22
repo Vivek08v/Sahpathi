@@ -176,11 +176,96 @@ class MediasoupClient {
         })
     }
 
-    async getExistingProducers() {
+    async publish(track, appData = {}){
+        if(!this.producerTransport){
+            throw new Error('Send transport not created');
+        }
 
+        try {
+            const producer = await this.producerTransport.produce({track, appData});
+            this.producers.set(producer.id, producer);
+
+            producer.on('trackended', () => {
+                console.log('track ended');
+                this.closeProducer(producer.id);
+            });
+
+            return producer;
+        }
+        catch(err){
+            console.error('Error producing: ', err);
+            throw err;
+        }
+    }
+
+    async getExistingProducers() {
+        return new Promise((resolve, reject) => {
+            this.socket.emit('getProducers', { roomId: this.roomId }, async(response) => {
+                console.log("get All producers: ", response.producers);
+
+                if(response.error){
+                    return reject(new Error(response.error));
+                }
+
+                try{
+                    const {producers} = response;
+                    for(const {peerId, producerId, kind} of producers) {
+                        console.log("connecting to producer: ", peerId, producerId, kind);
+                        await this.connectConsumer(peerId, producerId, kind);
+                    }
+                    resolve();
+                }
+                catch(error){
+                    console.error('error while getting allProducers: ', error);
+                    reject(error);
+                }
+            })
+        })
     }
 
     async connectConsumer(peerId, producerId, kind){
+        if(!this.consumerTransport) {
+            throw new Error('Receive transport not created');
+        }
+
+        console.log("connect consumer called for: ", this.peerId, " to connect with ", peerId, kind);
+        if(peerId === this.peerId){
+            return;
+        }
+
+        return new Promise((resolve, reject) => {
+            this.socket.emit('consume', {
+                roomId: this.roomId,
+                transportId: this.consumerTransport.id,
+                producerId,
+                rtpCapabilities: this.rtpCapabilities
+            }, async(response) => {
+                if(response.error) {
+                    return reject(new Error(response.error));
+                }
+
+                try{
+                    const consumer = await this.consumerTransport.consume({
+                        id: response.id,
+                        producerId: response.producerId,
+                        kind: response.kind,
+                        rtpParameters: response.rtpParameters
+                    });
+
+                    this.consumers.set(consumer.id, consumer);
+
+                    //
+
+                    resolve(consumer);
+                }
+                catch(err){
+                    reject(err);
+                }
+            })
+        })
+    }
+
+    closeProducer(producerId){
 
     }
 }

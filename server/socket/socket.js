@@ -113,6 +113,58 @@ io.on('connection', (socket) => {
             callback({ error: error.message });
         }
     });
+
+
+    socket.on('getProducers', ({ roomId }, callback) => {
+        try{
+            const room = roomsManager.getRoom(roomId);
+            
+            if(!room){
+                return callback({error: 'Room not found'});
+            }
+            
+            const producerList = [];
+            
+            room.peers.forEach(peer => {
+                peer.producers.forEach(producerId => {
+                    const producer = room.producers.get(producerId);
+                    if(producer){
+                        producerList.push({
+                            peerId: peer.id,
+                            producerId: producer.id,
+                            kind: producer.kind
+                        });
+                    }
+                    
+                });
+            })
+            
+            console.log(`getProducers for room ${roomId}:`, producerList);
+            callback({producers: producerList});
+        }
+        catch(err){
+            console.error('Error getting producers: ', error);
+            callback({error: error.message});
+        }
+    });
+
+
+    socket.on('consume', async({ roomId, transportId, producerId, rtpCapabilities }, callback) => {
+        try{
+            const room = roomsManager.getRoom(roomId);
+
+            if(!room){
+                return callback({error: 'Room not found'});
+            }
+
+            const consumer = await room.consume(socket.id, transportId, producerId, rtpCapabilities);
+            callback(consumer);
+        }
+        catch(error){
+            console.error('Error consuming: ', error);
+            callback({error: error.message });
+        }
+    });
 })
 
 export {app, server, io};
