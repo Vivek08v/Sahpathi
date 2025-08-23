@@ -269,3 +269,5 @@ class MediasoupClient {
 
     }
 }
+
+export default new MediasoupClient();

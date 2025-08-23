@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-module.exports = {
+export const config = {
   listenIp: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
   listenPort: process.env.PORT || 5000,
   sslCrt: process.env.SSL_CRT_FILEPATH || '',

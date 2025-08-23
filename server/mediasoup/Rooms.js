@@ -1,5 +1,5 @@
 import mediasoup from 'mediasoup';
-import config from './config';
+import { config } from './config.js';
 
 class Room {
     constructor(roomId, title, creatorId){
@@ -285,7 +285,7 @@ class Room {
             creatorId: this.creatorId,
             teacher: this.teacher,
             isTeacherAssigned: this.isTeacherAssigned,
-            peers: Arrays.from(this.peers.values()).map(peer => ({
+            peers: Array.from(this.peers.values()).map(peer => ({
                 id: peer.id,
                 name: peer.name,
                 role: peer.role
@@ -302,4 +302,5 @@ class Room {
     }
 }
 
-module.exports = Room;
+// module.exports = Room;
+export default Room;

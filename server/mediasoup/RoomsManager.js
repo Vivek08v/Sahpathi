@@ -1,5 +1,5 @@
 import { v4 as uuidv4} from 'uuid';
-import Room from './Room';
+import Room from './Rooms.js';
 
 class RoomsManager {
     constructor() {
@@ -9,7 +9,7 @@ class RoomsManager {
     async createRoom(title, creatorId) {
         const roomId = uuidv4();
         const room = new Room(roomId, title, creatorId);
-        await roomId.init();
+        await room.init();
         this.rooms.set(roomId, room);
         return room;
     }
@@ -19,7 +19,7 @@ class RoomsManager {
     }
 
     getRooms(){
-        return Array.from(this.rooms.values()).map(root => room.toJSON());
+        return Array.from(this.rooms.values()).map(room => room.toJSON());
     }
 
     removeRoom(roomId) {
@@ -43,4 +43,4 @@ class RoomsManager {
     }
 }
 
-module.exports = new RoomsManager();
+export default new RoomsManager();

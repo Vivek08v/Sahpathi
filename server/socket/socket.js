@@ -2,7 +2,7 @@ import {Server} from "socket.io";
 import http from "http";
 import express from "express";
 
-import roomsManager from "../mediasoup/RoomsManager";
+import roomsManager from "../mediasoup/RoomsManager.js";
 
 const app = express();
 const server = http.createServer(app);
