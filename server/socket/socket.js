@@ -114,6 +114,21 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('resumeConsumer', async ({ roomId, consumerId }, callback) => {
+    try {
+      const room = roomsManager.getRoom(roomId);
+      
+      if (!room) {
+        return callback?.({ error: 'Room not found' });
+      }
+      
+      await room.resumeConsumer(consumerId);
+      callback?.({ success: true });
+    } catch (error) {
+      console.error('Error resuming consumer', error);
+      callback?.({ error: error.message });
+    }
+  });
 
     socket.on('getProducers', ({ roomId }, callback) => {
         try{

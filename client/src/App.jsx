@@ -10,7 +10,7 @@ import Signup from './pages/Signup'
 import MediasoupClient from './services/MediasoupClient'
 
 import faceImg from './assets/home-img.jpeg'
-import { Room } from './pages/Room'
+import Room from './pages/Room'
 
 function App() {
 
@@ -33,6 +33,10 @@ function App() {
 
     initMediasoup();
   }, [])
+
+  if (!isInitialized) {
+    return <div>Connecting to signaling server...</div>;
+  }
 
   const handleSetUser = (userData) => {
     localStorage.setItem('user', JSON.stringify(userData))

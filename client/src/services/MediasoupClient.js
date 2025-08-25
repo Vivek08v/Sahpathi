@@ -15,6 +15,8 @@ class MediasoupClient {
         this.displayName = null;
         this.role = null;
         this.peers = new Map();
+        this.onNewConsumer = null;
+        this.onPeerJoined = null;
         //
     }
 
@@ -32,6 +34,21 @@ class MediasoupClient {
         this.socket.on('disconnect', () => {
             this.isConnected = false;
             console.log('Disconnected from socket');
+        })
+
+        this.socket.on('newPeer', ({ peerId, name, role }) => {
+            console.log("New peer joined: ", name, peerId);
+
+            this.peers.set(peerId, {id: peerId, name, role});
+
+            if(this.onPeerJoined){
+                this.onPeerJoined(peerId, name, role);
+            }
+        })
+
+        this.socket.on('newProducer', ({ peerId, producerId, kind }) => {
+            console.log("New Producer: ", peerId, producerId ,kind);
+            this.connectConsumer(peerId, producerId, kind);
         })
 
         //
@@ -144,7 +161,7 @@ class MediasoupClient {
 
     async createReceiveTransport() {
         return new Promise((resolve, reject) => {
-            this.socket.emit('createWebRtctransport', {roomId: this.roomId}, async (response) => {
+            this.socket.emit('createWebRtcTransport', {roomId: this.roomId}, async (response) => {
                 if(response.error){
                     return reject(new Error(response.error));
                 }
@@ -180,14 +197,16 @@ class MediasoupClient {
         if(!this.producerTransport){
             throw new Error('Send transport not created');
         }
-
+        
         try {
+            console.log(3, track, appData)
             const producer = await this.producerTransport.produce({track, appData});
+            console.log(4)
             this.producers.set(producer.id, producer);
-
+            
             producer.on('trackended', () => {
                 console.log('track ended');
-                this.closeProducer(producer.id);
+                // this.closeProducer(producer.id);
             });
 
             return producer;
@@ -238,7 +257,7 @@ class MediasoupClient {
                 roomId: this.roomId,
                 transportId: this.consumerTransport.id,
                 producerId,
-                rtpCapabilities: this.rtpCapabilities
+                rtpCapabilities: this.device.rtpCapabilities
             }, async(response) => {
                 if(response.error) {
                     return reject(new Error(response.error));
@@ -254,11 +273,23 @@ class MediasoupClient {
 
                     this.consumers.set(consumer.id, consumer);
 
-                    //
+                    this.socket.emit('resumeConsumer', {
+                        roomId: this.roomId,
+                        consumerId: consumer.id
+                    })
+
+                    if(this.onNewConsumer){
+                        this.onNewConsumer({  // callback function called
+                            consumer,
+                            peerId,
+                            kind
+                        }) 
+                    }
 
                     resolve(consumer);
                 }
                 catch(err){
+                    console.log("Error occured while consuming")
                     reject(err);
                 }
             })

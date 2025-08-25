@@ -181,7 +181,7 @@ class Room {
 
 
     // Produce
-    async produce(peerId, transportId, kind, rtpParameter, appData){
+    async produce(peerId, transportId, kind, rtpParameters, appData){
         if(!this.transports.has(transportId)){
             throw new Error(`Transport with id ${transportId} not found`);
         }
@@ -189,7 +189,7 @@ class Room {
         const transport = this.transports.get(transportId);
         const producer = await transport.produce({
             kind,
-            rtpParameter,
+            rtpParameters,
             appData: {
                 ...appData,
                 peerId
