@@ -1,8 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import {app, server} from './socket/socket.js';
+import connectDB from './config/database.js';
 import roomRoutes from "./routes/roomsRoutes.js"
 // const app = express();
+
+connectDB();
 
 // middlewars
 app.use(express.json())
