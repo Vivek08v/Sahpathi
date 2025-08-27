@@ -72,7 +72,10 @@ const userSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId, 
             ref: "User" 
         }
-    ]
+    ],
+    refreshToken: {
+        type: String,
+    }
 }, { timestamps: true });
 
 userSchema.index({ username: 1, email: 1});

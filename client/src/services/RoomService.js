@@ -13,14 +13,17 @@ const RoomService = {
     }
   },
 
-  createRoom: async (title, creatorId, creatorName) => {
+  createRoom: async (title, createdBy) => {
     console.log("hii2")
     try {
       const response = await axios.post(`${API_URL}/create-room`, {
         title,
-        creatorId,
-        creatorName
+        createdBy,
+        category: "Maths",   // need to be corrected
+        classtype: "TUTOR"
       });
+
+      console.log("response from API: ", response.data);
       return response.data.data;
     } catch (error) {
       console.error('Error creating room:', error);

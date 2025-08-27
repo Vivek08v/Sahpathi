@@ -1,8 +1,11 @@
 import RoomsManager from "../mediasoup/RoomsManager.js"
+import { Classroom } from "../models/classroom.model.js";
 
-export const getAllRooms = (req, res) => {
+export const getAllRooms = async(req, res) => {
     try{
-        const rooms = RoomsManager.getRooms();
+        // const rooms = RoomsManager.getRooms();
+        const rooms = await Classroom.find();
+
         return res.status(200).json({
             success: true,
             data: rooms,
@@ -20,21 +23,31 @@ export const getAllRooms = (req, res) => {
 
 export const createRoom = async(req, res) => {
     try{
-        const {title, creatorId, creatorName} = req.body;
-        console.log(title, creatorId, creatorName)
-        if(!title || !creatorId || !creatorName){
+        const {title, category, classtype, tags, createdBy} = req.body;  // issue in createdBy
+        console.log(title, category, classtype, createdBy.id, createdBy.name)
+        if(!title || !category || !classtype || !createdBy){
             return res.status(400).json({
                 success: false,
                 message: "API Failed: Missing data"
             })
         }
-        const room = await RoomsManager.createRoom(title, creatorId);
-        console.log("New Room created by ", creatorName, room.title);
+        const room = await RoomsManager.createRoom(title, createdBy.id);
+        console.log("New Room created by ", createdBy.name, room.title);
+
+        const roomStored = await Classroom.create({
+            classId: room.id,
+            classname: title,
+            category,
+            classtype,
+            // tags,
+            // createdBy,
+            // schedule
+        });
+        console.log("New Room stored: ", roomStored);
         
-        // console.log("qw")
         return res.status(200).json({
             success: true,
-            data: room.toJSON(),
+            data: roomStored,
             message: "API Success: Room Created"
         })
     }
