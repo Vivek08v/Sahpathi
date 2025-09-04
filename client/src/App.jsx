@@ -9,11 +9,14 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import MediasoupClient from './services/MediasoupClient'
 
+import { useSelector } from "react-redux"
+
 import faceImg from './assets/home-img.jpeg'
 import Room from './pages/Room'
 
 function App() {
-
+  // const token = null;  // to be changed
+  const token = useSelector((state)=> state.userSlice)
   const [isInitialized, setIsInitialized] = useState(false);
   const [user, setUser] = useState(()=> {
     const savedUser = localStorage.getItem('user')
@@ -31,10 +34,10 @@ function App() {
       }
     }
 
-    initMediasoup();
-  }, [])
+    if(token) initMediasoup();
+  }, [token])
 
-  if (!isInitialized) {
+  if (!isInitialized && token) {
     return <div>Connecting to signaling server...</div>;
   }
 

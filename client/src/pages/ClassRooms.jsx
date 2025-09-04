@@ -5,6 +5,7 @@ import RoomService from '../services/RoomService';
 const ClassRooms = ({user}) => {
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(false);
+  const [allRooms, setAllRooms] = useState([]);
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const ClassRooms = ({user}) => {
     try{
       const user = {id:1, name: "vivek"}
       // console.log("hii1", user)
-      const room = await RoomService.createRoom(title, user);
+      const room = await RoomService.createRoomAPI(title, user);
       console.log(room)
       setLoading(false);
       navigate(`/room/${room.classId}`);
@@ -32,6 +33,19 @@ const ClassRooms = ({user}) => {
       setLoading(false);
     }
   }
+
+  
+  const getAllRooms = async() => {
+    setLoading(true);
+    const allRooms = await RoomService.getRoomsAPI();
+    // allRooms(allRooms);
+    console.log(allRooms);
+    setLoading(false);
+  }
+
+  useEffect(()=> {
+    getAllRooms();
+  }, [])
 
   return (
     <div>

@@ -1,4 +1,4 @@
-import { User } from "../models/user.model";
+import { User } from "../models/user.model.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -44,16 +44,19 @@ export const signUp = async(req, res) => {
 }
 
 export const login = async(req, res) => {
+    // console.log("reached")
     try{
-        const {username, email, password} = req.body;
-        if((!username && !email) || !password){
+        console.log(req.body)
+        const {email, password} = req.body;
+        if(!email || !password){
             return res.status(401).json({
                 success: false,
                 message: "missing input datas"
             })
         }
 
-        const user = await User.findOne({ $or: [{username}, {email}]});
+        const user = await User.findOne({email});
+        // const user = await User.findOne({ $or: [{username}, {email}]});
         if(!user){
             return res.status(400).json({
                 success: false,
@@ -82,7 +85,9 @@ export const login = async(req, res) => {
 
         const options = {
             expires: new Date(Date.now() + 7*24*60*60*1000),
-            httpOnly: true
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false
         }
 
         user.refreshToken = refreshToken;
@@ -135,7 +140,9 @@ export const refreshAccessToken = async(req, res) => {
 
         const options = {
             expires: new Date(Date.now() + 7*24*60*60*1000),
-            httpOnly: true
+            httpOnly: true,
+            sameSite: "none",
+            secure: false
         }
 
         return res.cookie("accessToken", newAccessToken, options)

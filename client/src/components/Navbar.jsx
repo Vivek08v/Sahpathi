@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import logo from '../assets/sahpathi-logo.png';
 import { GrSchedules } from "react-icons/gr";
@@ -8,7 +9,9 @@ import { FaBell } from "react-icons/fa6";
 import { IoLogInOutline } from "react-icons/io5";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { user } = useSelector((state) => state.userSlice);
+  console.log(user)
+  // const [isLoggedIn, setIsLoggedIn] = useState(true);
   
   return (
     <div className="w-full bg-black/30 backdrop-blur-md shadow-lg border border-white/20 rounded-xl px-8 py-1 text-white">
@@ -38,18 +41,18 @@ const Navbar = () => {
 
         {/* Icons */}
         <div className="flex items-center gap-3 text-white/80">
-          {isLoggedIn && <NavLink to={"/my-schedules"} className="px-3 py-2 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200">
+          {user && <NavLink to={"/my-schedules"} className="px-3 py-2 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200">
             <GrSchedules />
           </NavLink>}
-          {isLoggedIn && <NavLink to={"/notification"} className="px-3 py-2 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200">
+          {user && <NavLink to={"/notification"} className="px-3 py-2 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200">
             <FaBell />
           </NavLink>}
           {/* {isLoggedIn && <NavLink to={"/my-profile"} className="px-3 py-2 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200">
             <GiBearFace onClick={()=>isLoggedIn=false}/>
           </NavLink>} */}
-          {isLoggedIn && <GiBearFace onClick={()=>setIsLoggedIn(false)}/> }
+          {user && <GiBearFace onClick={()=>setIsLoggedIn(false)}/> }
 
-          {!isLoggedIn && <NavLink to={"/login"} className="px-3 py-2 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200">
+          {!user && <NavLink to={"/login"} className="px-3 py-2 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200">
             <IoLogInOutline />
           </NavLink>}
           {/* {!isLoggedIn && <NavLink to={"/signup"} className="px-3 py-2 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200">

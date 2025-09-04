@@ -5,10 +5,24 @@ export const getAllRooms = async(req, res) => {
     try{
         // const rooms = RoomsManager.getRooms();
         const rooms = await Classroom.find();
-
+        
+        const grouped = {};
+        
+        rooms.map(room => {
+            if (!grouped[room.category]) {
+                grouped[room.category] = [];
+            }
+            grouped[room.category].push(room);
+        });
+        
+        // console.log(grouped);
+        
+        
+        console.log("ghi")
         return res.status(200).json({
             success: true,
-            data: rooms,
+            // data: rooms,
+            data: grouped,
             message: "API Success: Got all rooms..."
         })
     }

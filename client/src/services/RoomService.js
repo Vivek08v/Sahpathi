@@ -1,19 +1,25 @@
 import axios from 'axios';
+import { apiConnector } from './apiConnector';
 
 const API_URL = 'http://localhost:4000/api/v1';
 
 const RoomService = {
-  getRooms: async () => {
+  getRoomsAPI: async () => {
     try {
-      const response = await axios.get(`${API_URL}/get-all-rooms`);
-      return response.data;
+      const response = await apiConnector("GET", `${API_URL}/get-all-rooms`);
+      console.log(response);
+
+      if(!response.data.success){
+        throw new Error("Rooms fetch failed");
+      }
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching rooms:', error);
       throw error;
     }
   },
 
-  createRoom: async (title, createdBy) => {
+  createRoomAPI: async (title, createdBy) => {
     console.log("hii2")
     try {
       const response = await axios.post(`${API_URL}/create-room`, {

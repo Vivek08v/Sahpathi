@@ -3,11 +3,11 @@ import jwt from "jsonwebtoken"
 export const authN = async(req, res, next) => {
     try{
         const accessToken = req.cookies?.accessToken || req.body?.accessToken || 
-                            req.header("Authorization").replace("Bearer ", "");
+                            req.header("Authorization")?.replace("Bearer ", "");
 
         if(!accessToken){
             return res.status(401).json({
-                success: true,
+                success: false,
                 message: "access token not found"
             })
         }
