@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken"
 
 export const authN = async(req, res, next) => {
     try{
-        const accessToken = req.cookies?.accessToken || req.body?.accessToken || 
-                            req.header("Authorization")?.replace("Bearer ", "");
+        const accessToken = req.cookies?.accessToken || req.body?.accessToken 
+                            // req.header("Authorization")?.replace("Bearer ", "");
 
         if(!accessToken){
             return res.status(401).json({
@@ -19,9 +19,16 @@ export const authN = async(req, res, next) => {
     }
     catch(error){
         console.error("error in middleware authN: ", error);
-        return res.status(500).json({
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({
+                success: false,
+                message: "Access token expired"
+            });
+        }
+
+        return res.status(403).json({
             success: false,
-            message: "error in middleware authN"
-        })
+            message: "Invalid token"
+        });
     }
 }

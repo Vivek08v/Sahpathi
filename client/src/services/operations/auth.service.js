@@ -1,4 +1,4 @@
-import { setUser } from "../../redux/slices/userSlice";
+import { setAuthenticated, setUser } from "../../redux/slices/userSlice";
 import { apiConnector } from "../apiConnector";
 
 const API_URL = 'http://localhost:4000/api/v1';
@@ -17,6 +17,7 @@ export const logInAPI = (data, navigate) => {
             }
 
             dispatch(setUser(logInDetails.data.data))
+            dispatch(setAuthenticated(true));
             navigate("/classrooms")
         }
         catch(error){
@@ -24,3 +25,17 @@ export const logInAPI = (data, navigate) => {
         }
     }
 }
+
+// 1. Check at app startup
+export const initAuth = () => {
+  return async(dispatch) => {
+    try {
+      await apiConnector("POST", `${API_URL}/refresh`);
+      // await api.post("/auth/refresh"); // refresh token comes from cookie
+      dispatch(setAuthenticated(true));
+    } catch {
+      dispatch(setAuthenticated(false));
+    }
+  }
+};
+// 2. Axios interceptor for auto-refresh

@@ -4,6 +4,7 @@ const initialState = {
   user: localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null,
+  isAuthenticated: false,
   loading: false,
 };
 
@@ -15,8 +16,12 @@ export const userSlice = createSlice({
       state.user = action.payload;
       localStorage.setItem("user", JSON.stringify(action.payload));
     },
+    setAuthenticated: (state, action) => {
+      state.isAuthenticated = action.payload;
+    },
     clearUser: (state) => {
       state.user = null;
+      state.isAuthenticated = false;
       localStorage.removeItem("user");
     },
     setLoading: (state, action) => {
@@ -25,5 +30,5 @@ export const userSlice = createSlice({
   },
 });
 
-export const { setUser, clearUser, setLoading } = userSlice.actions;
+export const { setUser, setAuthenticated, clearUser, setLoading } = userSlice.actions;
 export default userSlice.reducer;

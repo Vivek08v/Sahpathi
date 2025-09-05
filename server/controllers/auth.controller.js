@@ -75,7 +75,7 @@ export const login = async(req, res) => {
         const accessToken = jwt.sign(
             {id: user._id,username: user.username, email: user.email, role: user.role},
             process.env.jwt_PASSWORD,
-            { expiresIn: "1h" }
+            { expiresIn: "5m" }
         )
         const refreshToken = jwt.sign(
             {id: user._id, username: user.username, email: user.email, role: user.role},
@@ -98,8 +98,8 @@ export const login = async(req, res) => {
                   .cookie("refreshToken", refreshToken, options).status(200).json({
                     success: true,
                     data: user,
-                    accessToken: accessToken,
-                    refreshToken: refreshToken,
+                    // accessToken: accessToken,
+                    // refreshToken: refreshToken,
                     message: "user signedUp successfully"
         })
     }
@@ -122,7 +122,7 @@ export const refreshAccessToken = async(req, res) => {
                 message: "no refresh token found"
             })
         }
-
+        
         const user = await User.findOne({ refreshToken });
         if(!user){
             return res.status(400).json({
@@ -132,24 +132,25 @@ export const refreshAccessToken = async(req, res) => {
         }
 
         const verifiedTokenPayload = jwt.verify(refreshToken, process.env.jwt_PASSWORD);
+        const { exp, iat, ...rest } = verifiedTokenPayload;
         const newAccessToken = jwt.sign(
-            verifiedTokenPayload, 
+            rest, 
             process.env.jwt_PASSWORD,
-            { expiresIn: "1h" }
+            { expiresIn: "5m" }
         )
-
+        
         const options = {
             expires: new Date(Date.now() + 7*24*60*60*1000),
             httpOnly: true,
-            sameSite: "none",
+            sameSite: "lax",
             secure: false
         }
 
         return res.cookie("accessToken", newAccessToken, options)
                   .cookie("refreshToken", refreshToken, options).status(200).json({
                     success: true,
-                    accessToken: newAccessToken,
-                    refreshToken: refreshToken,
+                    // accessToken: newAccessToken,
+                    // refreshToken: refreshToken,
                     message: "accessToken updated successfully"
         })
     }

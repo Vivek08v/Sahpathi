@@ -38,7 +38,7 @@ const ClassRooms = ({user}) => {
   const getAllRooms = async() => {
     setLoading(true);
     const allRooms = await RoomService.getRoomsAPI();
-    // allRooms(allRooms);
+    setAllRooms(allRooms);
     console.log(allRooms);
     setLoading(false);
   }
@@ -49,19 +49,28 @@ const ClassRooms = ({user}) => {
 
   return (
     <div>
-        ClassRooms
-        {error ?? 'Error'}
-        <form onSubmit={handleSubmit}>
-          <input type='text' id='title' placeholder='roomName'
-            value={title}
-            onChange={(e)=> setTitle(e.target.value)}
-            required
-          />
-          <button
-            type='submit'>
-            {loading ? 'Creating Room': 'Create Room'}
-          </button>
-        </form>
+        <div>
+          ClassRooms
+          {error ?? 'Error'}
+          <form onSubmit={handleSubmit}>
+            <input type='text' id='title' placeholder='roomName'
+              value={title}
+              onChange={(e)=> setTitle(e.target.value)}
+              required
+            />
+            <button
+              type='submit'>
+              {loading ? 'Creating Room': 'Create Room'}
+            </button>
+          </form>
+        </div>
+        <div>
+          {allRooms && allRooms["Maths"]?.map((room, i) => (
+            <div key={i}>
+              {room.classname}
+            </div>
+          ))}
+        </div>
     </div>
   )
 }

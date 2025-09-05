@@ -22,7 +22,7 @@ const RoomService = {
   createRoomAPI: async (title, createdBy) => {
     console.log("hii2")
     try {
-      const response = await axios.post(`${API_URL}/create-room`, {
+      const response = await apiConnector("POST", `${API_URL}/create-room`, {
         title,
         createdBy,
         category: "Maths",   // need to be corrected

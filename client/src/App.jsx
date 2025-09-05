@@ -9,19 +9,25 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import MediasoupClient from './services/MediasoupClient'
 
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 
 import faceImg from './assets/home-img.jpeg'
 import Room from './pages/Room'
+import { initAuth } from './services/operations/auth.service'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
-  // const token = null;  // to be changed
-  const token = useSelector((state)=> state.userSlice)
+  const dispatch = useDispatch();
+  const { isAuthenticated} = useSelector((state)=> state.userSlice)
   const [isInitialized, setIsInitialized] = useState(false);
   const [user, setUser] = useState(()=> {
     const savedUser = localStorage.getItem('user')
     return savedUser ? JSON.parse(savedUser) : null
   })
+
+  useEffect(()=> {
+    dispatch(initAuth());
+  }, [])
 
   useEffect(() => {
     const initMediasoup = async() => {
@@ -34,10 +40,10 @@ function App() {
       }
     }
 
-    if(token) initMediasoup();
-  }, [token])
+    if(isAuthenticated) initMediasoup();
+  }, [isAuthenticated])
 
-  if (!isInitialized && token) {
+  if (!isInitialized && isAuthenticated) {
     return <div>Connecting to signaling server...</div>;
   }
 
@@ -54,7 +60,7 @@ function App() {
 
         <Routes>
           <Route path='/' element={<Home/>} />
-          <Route path='/classrooms' element={<ClassRooms/>}/>
+          <Route path='/classrooms' element={<ProtectedRoute> <ClassRooms/> </ProtectedRoute>}/>
           {/* <Route path='/explore' element={<Explore/>}/>
           <Route path='/schedule' element={<Schedule/>}/>
           <Route path='/about' element={<About/>}/>
@@ -65,7 +71,7 @@ function App() {
           <Route path='/login' element={<Login/>}/>
           <Route path='/signup' element={<Signup/>}/>
 
-          <Route path='/room/:roomId' element={<Room/>}/>
+          <Route path='/room/:roomId' element={<ProtectedRoute> <Room/> </ProtectedRoute>}/>
         </Routes>
       </div>
     </>
