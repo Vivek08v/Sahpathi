@@ -46,6 +46,17 @@ class MediasoupClient {
             }
         })
 
+        this.socket.on('peerClosed', ({ peerId }) => {
+          console.log('Peer closed:', peerId);
+          if (this.onPeerClosed) {
+            this.onPeerClosed(peerId);
+          }
+
+          if (this.peers.has(peerId)) {
+            this.peers.delete(peerId);
+          }
+        });
+
         this.socket.on('newProducer', ({ peerId, producerId, kind }) => {
             console.log("New Producer: ", peerId, producerId ,kind);
             this.connectConsumer(peerId, producerId, kind);
@@ -102,6 +113,53 @@ class MediasoupClient {
                     reject(error);
                 }
             })
+        })
+    }
+
+    async leaveRoom() {
+        return new Promise((resolve) => {
+            try {
+                if (this.socket && this.roomId) {
+                    this.socket.emit('leaveRoom', { roomId: this.roomId }, () => {
+                        // perform local cleanup after server acknowledges
+                        this.closeAllProducers();
+                        this.closeAllConsumers();
+                        if (this.producerTransport) {
+                            this.producerTransport.close();
+                            this.producerTransport = null;
+                        }
+                        if (this.consumerTransport) {
+                            this.consumerTransport.close();
+                            this.consumerTransport = null;
+                        }
+                        this.roomId = null;
+                        this.peers.clear();
+                        resolve();
+                    });
+                } else {
+                    // no active room, just cleanup locally
+                    this.closeAllProducers();
+                    this.closeAllConsumers();
+                    if (this.producerTransport) {
+                        this.producerTransport.close();
+                        this.producerTransport = null;
+                    }
+                    if (this.consumerTransport) {
+                        this.consumerTransport.close();
+                        this.consumerTransport = null;
+                    }
+                    this.roomId = null;
+                    this.peers.clear();
+                    resolve();
+                }
+            } catch (e) {
+                // fallback cleanup
+                this.closeAllProducers();
+                this.closeAllConsumers();
+                this.roomId = null;
+                this.peers.clear();
+                resolve();
+            }
         })
     }
 
@@ -298,6 +356,22 @@ class MediasoupClient {
 
     closeProducer(producerId){
 
+    }
+    
+    // (duplicate removed; leaveRoom implemented above)
+
+    closeAllProducers() {
+        for (const producer of this.producers.values()) {
+            producer.close();
+        }
+        this.producers.clear();
+    }
+
+    closeAllConsumers() {
+        for (const consumer of this.consumers.values()) {
+            consumer.close();
+        }
+        this.consumers.clear();
     }
 }
 

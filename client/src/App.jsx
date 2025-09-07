@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
+import { useDispatch, useSelector } from "react-redux"
 import './App.css'
 
 import Home from './pages/Home'
-import Navbar from './components/Navbar'
 import ClassRooms from './pages/ClassRooms'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import MediasoupClient from './services/MediasoupClient'
-
-import { useDispatch, useSelector } from "react-redux"
-
-import faceImg from './assets/home-img.jpeg'
 import Room from './pages/Room'
 import { initAuth } from './services/operations/auth.service'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -20,10 +16,15 @@ function App() {
   const dispatch = useDispatch();
   const { isAuthenticated} = useSelector((state)=> state.userSlice)
   const [isInitialized, setIsInitialized] = useState(false);
-  const [user, setUser] = useState(()=> {
-    const savedUser = localStorage.getItem('user')
-    return savedUser ? JSON.parse(savedUser) : null
-  })
+  // const [user, setUser] = useState(()=> {
+  //   const savedUser = localStorage.getItem('user')
+  //   return savedUser ? JSON.parse(savedUser) : null
+  // })
+
+  // const handleSetUser = (userData) => {
+  //   localStorage.setItem('user', JSON.stringify(userData))
+  //   setUser(userData)
+  // }
 
   useEffect(()=> {
     dispatch(initAuth());
@@ -45,11 +46,6 @@ function App() {
 
   if (!isInitialized && isAuthenticated) {
     return <div>Connecting to signaling server...</div>;
-  }
-
-  const handleSetUser = (userData) => {
-    localStorage.setItem('user', JSON.stringify(userData))
-    setUser(userData)
   }
 
   return (

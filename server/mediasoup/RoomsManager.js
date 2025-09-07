@@ -1,5 +1,6 @@
 import { v4 as uuidv4} from 'uuid';
 import Room from './Rooms.js';
+import { Classroom } from '../models/classroom.model.js';
 
 class RoomsManager {
     constructor() {
@@ -34,9 +35,11 @@ class RoomsManager {
         return false;
     }
 
-    cleanUpRooms() {
+    async cleanUpRooms() {
         for(const [roomId, room] of this.rooms.entries()){
+            console.log("Room Cleaning Up...", room)
             if(room.isRoomEmpty()){
+                await Classroom.findOneAndUpdate({ classId: roomId}, {$set: {status: "Completed"}})
                 this.removeRoom(roomId);
             }
         }

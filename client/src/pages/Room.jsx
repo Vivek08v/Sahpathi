@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import VideoPlayer from "./VideoPlayer";
 import MediasoupClient from "../services/MediasoupClient";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const Room = () => {
   const { roomId } = useParams();
+  const navigate = useNavigate();
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState({});
+
+  const localStreamRef = useRef(null);
 
   useEffect(() => {
     const join = async () => {
@@ -34,12 +37,22 @@ const Room = () => {
           }
         };
 
+        // Peer closed → remove its streams
+        MediasoupClient.onPeerClosed = (peerId) => {
+          setRemoteStreams(prev => {
+            const next = { ...prev };
+            delete next[peerId];
+            return next;
+          });
+        };
+
         // get local media
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
           video: true,
         });
         setLocalStream(stream);
+        localStreamRef.current = stream;
 
         // publish tracks
         const videoTrack = stream.getVideoTracks()[0];
@@ -59,19 +72,38 @@ const Room = () => {
     };
 
     join();
+
+    return () => {
+      console.log("Room CleanUp Time...");
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+      MediasoupClient.leaveRoom();
+    };
   }, [roomId]);
+
+  const classEndHandler = async () => {
+    try {
+      await MediasoupClient.leaveRoom();
+    } finally {
+      navigate('/');
+    }
+  }
 
   return (
     <div className="flex flex-wrap">
-      {/* Local video */}
-      {localStream && <VideoPlayer stream={localStream} muted={true} />}
+      <div><button onClick={classEndHandler}>End Class</button></div>
+      <div>
+        {/* Local video */}
+        {localStream && <VideoPlayer stream={localStream} muted={true} />}
 
-      {/* Remote videos */}
-      {Object.entries(remoteStreams).map(([peerId, tracks]) => {
-        const stream = tracks.video || tracks.audio;
-        console.log(peerId, tracks)
-        return <VideoPlayer key={peerId} stream={stream} muted={true} />
-      })}
+        {/* Remote videos */}
+        {Object.entries(remoteStreams).map(([peerId, tracks]) => {
+          const stream = tracks.video || tracks.audio;
+          console.log(peerId, tracks)
+          return <VideoPlayer key={peerId} stream={stream} muted={true} />
+        })}
+      </div>
     </div>
   );
 };

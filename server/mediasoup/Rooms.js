@@ -67,6 +67,7 @@ class Room {
 
     removePeer(peerId) {
         if(!this.peers.has(peerId)) return;
+        console.log("Remove peer called")
 
         const peer = this.peers.get(peerId);
 
@@ -97,7 +98,7 @@ class Room {
             }
         })
 
-        if(peer.id === this.teacher.id){
+        if(this.teacher && peer.id === this.teacher){
             this.teacher = null;
             this.isTeacherAssigned = false;
         }

@@ -31,7 +31,7 @@ const classroomSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum:["Searching", "Scheduled", "Ongoing", "Completed"],
+        enum:["Searching", "Scheduled", "Ongoing", "Completed", "Cancelled"],
         default: "Searching",
     },
     schedule: {

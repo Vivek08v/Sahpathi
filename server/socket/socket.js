@@ -3,6 +3,7 @@ import http from "http";
 import express from "express";
 
 import roomsManager from "../mediasoup/RoomsManager.js";
+import { Classroom } from "../models/classroom.model.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -10,13 +11,58 @@ const io = new Server(server, {
     cors: "http://localhost:3000",
 })
 
+// Clean up empty rooms periodically
+setInterval(() => {
+    console.log("setInterval Ran...")
+    roomsManager.cleanUpRooms();
+}, 120000); // 5 minutes
+
 io.on('connection', (socket) => {
     console.log('A client connected', socket.id);
     let currentRoom = null;
 
-    socket.on('disconnect', () => {
+    socket.on('leaveRoom', async ({ roomId }, callback) => {
+        try {
+            const room = roomsManager.getRoom(roomId);
+            if (!room) {
+                return callback?.({ error: 'Room not found' });
+            }
+
+            room.removePeer(socket.id);
+            socket.leave(roomId);
+            socket.to(roomId).emit('peerClosed', { peerId: socket.id });
+
+            if (room.isRoomEmpty()) {
+                await Classroom.findOneAndUpdate({ classId: roomId}, {$set: {status: "Completed"}})
+                roomsManager.removeRoom(roomId);
+            }
+
+            if (currentRoom === roomId) currentRoom = null;
+            callback?.({ success: true });
+        } catch (error) {
+            console.error('Error leaving room:', error);
+            callback?.({ error: error.message });
+        }
+    });
+
+    socket.on('disconnect', async () => {
         console.log('Client disconnected', socket.id);
-        //
+        
+        if (currentRoom) {
+          const room = roomsManager.getRoom(currentRoom);
+          if (room) {
+            room.removePeer(socket.id);
+            
+            // Notify other peers about the disconnection
+            socket.to(currentRoom).emit('peerClosed', { peerId: socket.id });
+            
+            // Check if room is empty and remove it
+            if (room.isRoomEmpty()) {
+              await Classroom.findOneAndUpdate({ classId: currentRoom}, {$set: {status: "Completed"}})
+              roomsManager.removeRoom(currentRoom);
+            }
+          }
+        }
     })
 
 

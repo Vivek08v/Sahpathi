@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken"
 
 export const authN = async(req, res, next) => {
     try{
-        const accessToken = req.cookies?.accessToken || req.body?.accessToken 
-                            // req.header("Authorization")?.replace("Bearer ", "");
+        const accessToken = req.cookies?.accessToken;
+                    // || req.body?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
 
         if(!accessToken){
             return res.status(401).json({
@@ -11,6 +11,9 @@ export const authN = async(req, res, next) => {
                 message: "access token not found"
             })
         }
+
+        const decoded = jwt.decode(accessToken);
+        console.log("My access token Details: ", decoded);  // Only for debugging
 
         const payload = jwt.verify(accessToken, process.env.jwt_PASSWORD);
         req.user = payload;

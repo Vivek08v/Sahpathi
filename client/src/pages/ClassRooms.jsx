@@ -66,8 +66,8 @@ const ClassRooms = ({user}) => {
         </div>
         <div>
           {allRooms && allRooms["Maths"]?.map((room, i) => (
-            <div key={i}>
-              {room.classname}
+            <div key={i} onClick={()=>navigate(`/room/${room.classId}`)}>
+              {room.classname} {"--->"} {room.status}
             </div>
           ))}
         </div>

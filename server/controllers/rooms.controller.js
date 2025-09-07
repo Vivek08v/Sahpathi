@@ -3,12 +3,19 @@ import { Classroom } from "../models/classroom.model.js";
 
 export const getAllRooms = async(req, res) => {
     try{
-        // const rooms = RoomsManager.getRooms();
-        const rooms = await Classroom.find();
+        const roomsInMemory = RoomsManager.getRooms();
+        const roomsInDB = await Classroom.find();
+
+        // console.log(roomsInMemory);
+        // console.log(roomsInDB);
+        // const activeRooms = roomsInMemory.map((room, i) => (
+        //     roomsInDB.find((r) => r.classId === room.id)
+        // ))
+        // console.log(activeRooms);
         
         const grouped = {};
         
-        rooms.map(room => {
+        roomsInDB?.map(room => {
             if (!grouped[room.category]) {
                 grouped[room.category] = [];
             }

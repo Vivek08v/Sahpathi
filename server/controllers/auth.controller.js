@@ -115,7 +115,8 @@ export const login = async(req, res) => {
 
 export const refreshAccessToken = async(req, res) => {
     try{
-        const refreshToken = req.cookies.refreshToken ||  req.body.refreshToken;
+        const refreshToken = req.cookies.refreshToken;
+                                        // ||  req.body.refreshToken;
         if(!refreshToken){
             return res.status(400).json({
                 success: false,
