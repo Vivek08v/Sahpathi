@@ -96,9 +96,9 @@ io.on('connection', (socket) => {
                 routerRtpCapabilities
             });
         }
-        catch(err){
+        catch(error){
             console.error('Error joining room: ', error);
-            callback({error: err.message });
+            callback({error: error.message });
         }
     });
 

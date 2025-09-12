@@ -1,3 +1,15 @@
+to-do.txt
+z_Ideas
+
+# server
+server/node_modules/
+server/read.txt
+
+.env
+
+
+# client
+
 # Logs
 logs
 *.log

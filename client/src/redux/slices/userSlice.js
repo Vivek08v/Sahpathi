@@ -4,7 +4,8 @@ const initialState = {
   user: localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null,
-  isAuthenticated: false,
+  isAuthenticated: null,  // null means not checked yet, false if auth failed, else true
+  isInitialized: false,
   loading: false,
 };
 
@@ -15,6 +16,9 @@ export const userSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       localStorage.setItem("user", JSON.stringify(action.payload));
+    },
+    setInitialized: (state, action) => {
+      state.isInitialized = action.payload;
     },
     setAuthenticated: (state, action) => {
       state.isAuthenticated = action.payload;
@@ -30,5 +34,5 @@ export const userSlice = createSlice({
   },
 });
 
-export const { setUser, setAuthenticated, clearUser, setLoading } = userSlice.actions;
+export const { setUser, setAuthenticated, setInitialized, clearUser, setLoading } = userSlice.actions;
 export default userSlice.reducer;

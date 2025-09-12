@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux"
+import { setInitialized } from './redux/slices/userSlice'
 import './App.css'
 
 import Home from './pages/Home'
@@ -11,11 +12,12 @@ import MediasoupClient from './services/MediasoupClient'
 import Room from './pages/Room'
 import { initAuth } from './services/operations/auth.service'
 import ProtectedRoute from './components/ProtectedRoute'
+import CreateClass from './components/CreateClass'
 
 function App() {
   const dispatch = useDispatch();
-  const { isAuthenticated} = useSelector((state)=> state.userSlice)
-  const [isInitialized, setIsInitialized] = useState(false);
+  const { isAuthenticated, isInitialized} = useSelector((state)=> state.userSlice)
+  // const [isInitialized, setIsInitialized] = useState(false);
   // const [user, setUser] = useState(()=> {
   //   const savedUser = localStorage.getItem('user')
   //   return savedUser ? JSON.parse(savedUser) : null
@@ -28,13 +30,14 @@ function App() {
 
   useEffect(()=> {
     dispatch(initAuth());
-  }, [])
+  }, [isAuthenticated])
 
   useEffect(() => {
     const initMediasoup = async() => {
       try{
-        await MediasoupClient.init()
-        setIsInitialized(true);
+        await MediasoupClient.init();
+        console.log("set Initialised")
+        dispatch(setInitialized(true));
       }
       catch(error){
         console.error('Error in Initialising mediasoup client: ', error);
@@ -59,9 +62,11 @@ function App() {
           <Route path='/classrooms' element={<ProtectedRoute> <ClassRooms/> </ProtectedRoute>}/>
           {/* <Route path='/explore' element={<Explore/>}/>
           <Route path='/schedule' element={<Schedule/>}/>
-          <Route path='/about' element={<About/>}/>
+          <Route path='/about' element={<About/>}/>*/}
 
-          <Route path='/my-sessions' element={<MySessions/>}/>
+          <Route path='/classrooms/create-new-class' element={<ProtectedRoute> <CreateClass/> </ProtectedRoute>}/>
+
+          {/* <Route path='/my-sessions' element={<MySessions/>}/>
           <Route path='/notification' element={<Notification/>}/>
           <Route path='/profile' element={<Profile/>}/> */}
           <Route path='/login' element={<Login/>}/>

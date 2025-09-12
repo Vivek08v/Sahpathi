@@ -25,9 +25,9 @@ const classroomSchema = new mongoose.Schema({
         default: []
     },
     createdBy: {
-        // type: mongoose.Schema.Types.ObjectId,
-        // ref: "User",
-        // required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
     status: {
         type: String,
@@ -47,16 +47,16 @@ const classroomSchema = new mongoose.Schema({
     },
     participants: [
         {
-            // user: {
-            //     type: mongoose.Schema.Types.ObjectId,
-            //     ref: "User",
-            //     required: true
-            // },
-            // role: {
-            //     type: String,
-            //     enum: ["Learner", "Tutor"],
-            //     required: true
-            // }
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+                required: true
+            },
+            role: {
+                type: String,
+                enum: ["Learner", "Tutor"],
+                required: true
+            }
         }
     ]
 }, { timestamps: true });

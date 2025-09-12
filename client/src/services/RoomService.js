@@ -19,15 +19,10 @@ const RoomService = {
     }
   },
 
-  createRoomAPI: async (title, createdBy) => {
+  createRoomAPI: async (formData) => {
     console.log("hii2")
     try {
-      const response = await apiConnector("POST", `${API_URL}/create-room`, {
-        title,
-        createdBy,
-        category: "Maths",   // need to be corrected
-        classtype: "TUTOR"
-      });
+      const response = await apiConnector("POST", `${API_URL}/create-room`, formData);
 
       console.log("response from API: ", response.data);
       return response.data.data;

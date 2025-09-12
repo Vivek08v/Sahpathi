@@ -16,7 +16,7 @@ const VideoPlayer = ({ stream, muted = false }) => {
       tryPlay();
     }
   }, [stream]);
-  console.log("hhhhhhhhhh")
+  // console.log("hhhhhhhhhh")
   return (
     <div className="w-1/2 p-2">
       <video
@@ -26,6 +26,7 @@ const VideoPlayer = ({ stream, muted = false }) => {
         muted={muted}
         className="w-full h-48 bg-black rounded"
       />
+      {/* <div>{"->"} - {role}</div> */}
     </div>
   );
 };

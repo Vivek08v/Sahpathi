@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import VideoPlayer from "./VideoPlayer";
+import VideoPlayer from "../components/VideoPlayer";
 import MediasoupClient from "../services/MediasoupClient";
 import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { roomSlice } from "../redux/slices/roomSlice";
 
 const Room = () => {
   const { roomId } = useParams();
@@ -11,11 +13,14 @@ const Room = () => {
 
   const localStreamRef = useRef(null);
 
+  const { isInitialized} = useSelector((state)=> state.userSlice);
+  const { role } = useSelector((state) => state.roomSlice);
+
   useEffect(() => {
     const join = async () => {
       try {
-        console.log("Joining room:", roomId);
-        const roomData = await MediasoupClient.joinRoom(roomId, "Vivek", "student");
+        console.log("Joining room:", roomId, role);
+        const roomData = await MediasoupClient.joinRoom(roomId, "Vivek", role);  // to be changed
         console.log("Room data:", roomData);
 
         // New consumer → add its stream to list
@@ -71,7 +76,10 @@ const Room = () => {
       }
     };
 
-    join();
+    if(isInitialized){
+      console.log(isInitialized, ": Joining")
+      join();
+    }
 
     return () => {
       console.log("Room CleanUp Time...");
@@ -80,13 +88,13 @@ const Room = () => {
       }
       MediasoupClient.leaveRoom();
     };
-  }, [roomId]);
+  }, [roomId], [isInitialized]);
 
   const classEndHandler = async () => {
     try {
       await MediasoupClient.leaveRoom();
     } finally {
-      navigate('/');
+      navigate('/classrooms');
     }
   }
 
