@@ -13,11 +13,14 @@ export const roomSlice = createSlice({
     reducers: {
         setRole: (state, action) => {
             state.role = action.payload;
-            console.log("roomSlice :", state.role);
+        },
+        setRoom: (state, action) => {
+            state.room = action.payload;
         }
         // UNSET ROLE
+        // UNSET ROOM
     }
 });
 
-export const { setRole } = roomSlice.actions;
+export const { setRole, setRoom } = roomSlice.actions;
 export default roomSlice.reducer;

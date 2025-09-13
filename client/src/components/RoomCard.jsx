@@ -75,16 +75,13 @@ const getColor = {
 const RoomCard = ({ room }) => {
   const navigate = useNavigate();
 
-  const dispatch = useDispatch();
-
-  const teacherJoin = () => {
-    console.log("hii")
-    dispatch(setRole("teacher"));
-    navigate(`/room/${room.classId}`);
+  const enterRoomPreview = () => {
+    // set Room
+    navigate(`/room/preview/${room.classId}`)
   }
 
   return (
-    <div
+    <div onClick={enterRoomPreview}
       className={`shadow-lg rounded-3xl overflow-hidden min-w-[260px] max-w-[300px] cursor-pointer transform transition hover:scale-105 hover:shadow-2xl`}
     >
       {/* Image with gradient overlay */}
@@ -117,24 +114,6 @@ const RoomCard = ({ room }) => {
           </p>
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-3">
-          <button
-            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-semibold transition"
-            onClick={() => navigate(`/room/${room.classId}`)}
-          >
-            Join
-          </button>
-
-          {room.classtype === "TUTOR" && (
-            <button
-              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl font-semibold transition"
-              onClick={teacherJoin}
-            >
-              Teach
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );

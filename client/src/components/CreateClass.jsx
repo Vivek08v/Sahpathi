@@ -33,7 +33,7 @@ const CreateClass = () => {
           const room = await RoomService.createRoomAPI({...formData, user});
           console.log(room);
           setLoading(false);
-          navigate(`/room/${room.classId}`);
+          navigate(`/room/preview/${room.classId}`);
         }
         catch(error){
           console.log('Error creating room: ', error);

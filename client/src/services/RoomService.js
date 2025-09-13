@@ -4,6 +4,20 @@ import { apiConnector } from './apiConnector';
 const API_URL = 'http://localhost:4000/api/v1';
 
 const RoomService = {
+  getRoomAPI: async (roomId) => {
+    try {
+      const response = await apiConnector("GET", `${API_URL}/get-room/${roomId}`);
+      console.log(response);
+
+      if(!response.data.success){
+        throw new Error("Rooms fetch failed");
+      }
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      throw error;
+    }
+  },
   getRoomsAPI: async () => {
     try {
       const response = await apiConnector("GET", `${API_URL}/get-all-rooms`);

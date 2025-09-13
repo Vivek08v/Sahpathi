@@ -13,7 +13,10 @@ const ClassRooms = () => {
   const getAllRooms = async () => {
     setLoading(true);
     const allRooms = await RoomService.getRoomsAPI();
-    setAllRooms(allRooms);
+    const rooms = Object.fromEntries(
+      Object.entries(allRooms).map(([key, arr]) => [key, arr.slice().reverse()])
+    );
+    setAllRooms(rooms);
     setLoading(false);
   };
 

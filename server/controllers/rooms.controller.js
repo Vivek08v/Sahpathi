@@ -47,6 +47,39 @@ export const getAllRooms = async(req, res) => {
     }
 }
 
+export const getRoom = async(req, res) => {
+    try{
+        const { id } = req.params;
+        console.log("hii1");
+        const roomsInMemory = RoomsManager.getRooms();
+        console.log(id);
+        console.log(roomsInMemory);
+        const room = roomsInMemory.filter((room) => room.id === id);
+        
+        console.log("hii3");
+        console.log(room);
+        if(room && room.length===0){
+            return res.status(200).json({
+                success: false,
+                message: "API Failed: Room Not Found"
+            })
+        }
+        
+        return res.status(200).json({
+            success: true,
+            data: room[0],
+            message: "API Success: Got the room..."
+        })
+    }
+    catch(error){
+        console.log('Error in getAllRooms: ', error);
+        return res.status(500).json({
+            success: false,
+            message: "API Failed: Couldn't get Room"
+        })
+    }
+}
+
 export const createRoom = async(req, res) => {
     try{
         const {title, category, classtype, tags, user} = req.body;  // issue in createdBy
