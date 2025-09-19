@@ -7,6 +7,7 @@ class Room {
         this.title = title;
         this.creatorId = creatorId;
         this.peers = new Map();
+        this.chatPeers = new Map();  // peers in room preview
         this.transports = new Map();
         this.producers = new Map();
         this.consumers = new Map();
@@ -40,6 +41,39 @@ class Room {
             console.error('Error while creating room: ', error);
             throw error;
         }
+    }
+
+    addChatPeer(peerId, name, role){  // add chat peers
+        if(this.chatPeers.has(peerId)){
+            return this.chatPeers.get(peerId);
+        }
+
+        this.chatPeers.set(peerId, {
+            id: peerId,
+            name,
+            role,
+            isConnected: false
+        });
+
+        if(role === 'teacher' && !this.isTeacherAssigned){
+            this.teacher = peerId;
+            this.isTeacherAssigned = true;
+        }
+
+       return this.chatPeers.get(peerId);
+    }
+
+    removeChatPeer(peerId) {      // remove chat peers
+        if(!this.chatPeers.has(peerId)) return;
+        console.log("Remove chat-peer called")
+
+        const peer = this.chatPeers.get(peerId);
+
+        this.chatPeers.delete(peerId);
+        console.log("..................")
+        console.log(this.chatPeers);
+        console.log("Chat-Peer: ", peerId, " left the room: ", this.title);
+        // console.log("Peers-left: ", Array.from(this.chatPeers).length)
     }
 
     addPeer(peerId, name, role){

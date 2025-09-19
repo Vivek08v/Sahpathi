@@ -16,6 +16,8 @@ class RoomsManager {
     }
 
     getRoom(roomId){
+        // console.log("All rooms:")
+        // Array.from(this.rooms.values()).map(room => console.log(room.id));
         return this.rooms.get(roomId);
     }
 

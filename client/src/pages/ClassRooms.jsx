@@ -61,13 +61,17 @@ const ClassRooms = () => {
         </button>
       </div>
 
+      {loading && <div>
+        loading
+      </div>}
+
       {/* Tab Content */}
-      {activeTab === "my" && (
+      {!loading && activeTab === "my" && (
         <div>
           <h2 className="text-xl font-semibold mb-3">My Rooms</h2>
           <div className="flex gap-4 overflow-x-auto pb-2">
             {allRooms["MyRooms"]?.length > 0 ? (
-              allRooms["MyRooms"].map((room) => <RoomCard key={room.id} room={room}/> )
+              allRooms["MyRooms"].map((room, i) => <RoomCard key={i} room={room}/> )
             ) : (
               <p className="text-gray-500">No rooms yet</p>
             )}
@@ -75,7 +79,7 @@ const ClassRooms = () => {
         </div>
       )}
 
-      {activeTab === "all" && (
+      {!loading && activeTab === "all" && (
         <div>
           {Object.keys(allRooms).map((status, i) =>
             status !== "MyRooms" && (

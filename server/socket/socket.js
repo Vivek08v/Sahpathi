@@ -1,6 +1,7 @@
 import {Server} from "socket.io";
 import http from "http";
 import express from "express";
+import { v4 as uuidv4} from 'uuid';
 
 import roomsManager from "../mediasoup/RoomsManager.js";
 import { Classroom } from "../models/classroom.model.js";
@@ -12,14 +13,35 @@ const io = new Server(server, {
 })
 
 // Clean up empty rooms periodically
-setInterval(() => {
-    console.log("setInterval Ran...")
-    roomsManager.cleanUpRooms();
-}, 120000); // 5 minutes
+// setInterval(() => {
+//     console.log("setInterval Ran...")
+//     roomsManager.cleanUpRooms();
+// }, 120000); // 5 minutes
 
 io.on('connection', (socket) => {
     console.log('A client connected', socket.id);
     let currentRoom = null;
+
+    // leave room Preview
+    socket.on('leaveRoomPreview', async ({ roomId }, callback) => {
+        try {
+            const room = roomsManager.getRoom(roomId);
+            if (!room) {
+                return callback?.({ error: 'Room not found' });
+            }
+
+            console.log("Someone is leaving the room")
+            room.removeChatPeer(socket.id);
+            socket.leave(roomId);
+            socket.to(roomId).emit('chatPeerClosed', { peerId: socket.id });
+
+            if (currentRoom === roomId) currentRoom = null;
+            callback?.({ success: true });
+        } catch (error) {
+            console.error('Error leaving room preview:', error);
+            callback?.({ error: error.message });
+        }
+    });
 
     socket.on('leaveRoom', async ({ roomId }, callback) => {
         try {
@@ -32,10 +54,10 @@ io.on('connection', (socket) => {
             socket.leave(roomId);
             socket.to(roomId).emit('peerClosed', { peerId: socket.id });
 
-            if (room.isRoomEmpty()) {
-                await Classroom.findOneAndUpdate({ classId: roomId}, {$set: {status: "Completed"}})
-                roomsManager.removeRoom(roomId);
-            }
+            // if (room.isRoomEmpty()) {
+            //     await Classroom.findOneAndUpdate({ classId: roomId}, {$set: {status: "Completed"}})
+            //     roomsManager.removeRoom(roomId);
+            // }
 
             if (currentRoom === roomId) currentRoom = null;
             callback?.({ success: true });
@@ -57,19 +79,67 @@ io.on('connection', (socket) => {
             socket.to(currentRoom).emit('peerClosed', { peerId: socket.id });
             
             // Check if room is empty and remove it
-            if (room.isRoomEmpty()) {
-              await Classroom.findOneAndUpdate({ classId: currentRoom}, {$set: {status: "Completed"}})
-              roomsManager.removeRoom(currentRoom);
-            }
+            // if (room.isRoomEmpty()) {
+            //   await Classroom.findOneAndUpdate({ classId: currentRoom}, {$set: {status: ""}})
+            //   roomsManager.removeRoom(currentRoom);
+            // }
           }
         }
     })
+
+    // join room preview
+    socket.on('joinRoomPreview', async ({ roomId, name, role = 'student'}, callback) => {
+        try {
+            const room = roomsManager.getRoom(roomId);
+
+            if(!room) {
+                return callback({ error: 'Room not found' });
+            }
+
+            currentRoom = roomId;
+            socket.join(roomId);
+
+            if(role === 'teacher' && room.isTeacherAssigned) {
+                role = 'student';
+            }
+
+            const peer = room.addChatPeer(socket.id, name, role);
+
+            console.log(roomId)
+            socket.to(roomId).emit('newChatPeer', {
+                peerId: socket.id,
+                name, 
+                role
+            });
+
+            const roomObj = {
+              id: room.id,
+              title: room.title,
+              creatorId: room.creatorId,
+              teacher: room.teacher,
+              isTeacherAssigned: room.isTeacherAssigned,
+              peers: Array.from(room.peers.values()),
+              chatPeers: Array.from(room.chatPeers.values()),
+            };
+
+            // console.log("....................................")
+            // console.log(roomObj)
+            // console.log("....................................")
+
+            callback({
+                roomData: roomObj,
+            });
+        }
+        catch(error){
+            console.error('Error joining room: ', error);
+            callback({error: error.message });
+        }
+    });
 
 
     socket.on('joinRoom', async ({ roomId, name, role = 'student'}, callback) => {
         try {
             const room = roomsManager.getRoom(roomId);
-
             if(!room) {
                 return callback({ error: 'Room not found' });
             }
@@ -225,6 +295,18 @@ io.on('connection', (socket) => {
             console.error('Error consuming: ', error);
             callback({error: error.message });
         }
+    });
+
+
+    // Chat functionality
+    socket.on('chatMessage', ({ roomId, message, sender }) => {
+        console.log(message);
+      io.to(roomId).emit('chatMessage', { 
+        id: uuidv4(), 
+        sender, 
+        text: message, 
+        timestamp: new Date().toISOString() 
+      });
     });
 })
 

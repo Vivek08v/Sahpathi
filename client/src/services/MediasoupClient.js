@@ -15,8 +15,13 @@ class MediasoupClient {
         this.displayName = null;
         this.role = null;
         this.peers = new Map();
-        this.onNewConsumer = null;
         this.onPeerJoined = null;
+        this.onPeerClosed = null;
+        this.chatPeers = new Map();   // chat peers
+        this.onChatPeerJoined = null;
+        this.onChatPeerClosed = null;
+        this.onNewConsumer = null;
+        this.onChatMessage = null;
         //
     }
 
@@ -35,6 +40,28 @@ class MediasoupClient {
             this.isConnected = false;
             console.log('Disconnected from socket');
         })
+
+        this.socket.on('newChatPeer', ({ peerId, name, role }) => {  // chat peers
+            console.log("........................................")
+            console.log("New chat peer joined: ", name, peerId, role);
+
+            this.chatPeers.set(peerId, {id: peerId, name, role});
+
+            if(this.onChatPeerJoined){
+                this.onChatPeerJoined(peerId, name, role);
+            }
+        })
+
+        this.socket.on('chatPeerClosed', ({ peerId }) => {   // chat peers
+          console.log('Peer closed:', peerId);
+          if (this.onChatPeerClosed) {
+            this.onChatPeerClosed(peerId);
+          }
+
+          if (this.chatPeers.has(peerId)) {
+            this.chatPeers.delete(peerId);
+          }
+        });
 
         this.socket.on('newPeer', ({ peerId, name, role }) => {
             console.log("New peer joined: ", name, peerId);
@@ -62,6 +89,13 @@ class MediasoupClient {
             this.connectConsumer(peerId, producerId, kind);
         })
 
+        this.socket.on('chatMessage', ({id, sender, text, timestamp}) => {  
+          console.log('Chat message:', text);
+          if (this.onChatMessage) {
+            this.onChatMessage({text, sender, timestamp});
+          }
+        });
+
         //
 
         try {
@@ -73,6 +107,57 @@ class MediasoupClient {
         }
     }
 
+    async joinRoomPreview(roomId, displayName, role = 'student') {
+        if(!this.isConnected) {
+            throw new Error('Not connected to signaling server');
+        }
+
+        return new Promise((resolve, reject) => {
+            this.socket.emit('joinRoomPreview', {roomId, name: displayName, role}, async (response) => {
+                if(response.error) {
+                    return reject(new Error(response.error));
+                }
+
+                this.roomId = roomId;
+                this.displayName = displayName;
+                this.role = role;
+                
+                const { roomData } = response;
+                console.log("response:", roomData)
+
+                roomData.chatPeers.forEach(peer => {
+                    this.chatPeers.set(peer.id, peer);
+                    this.onChatPeerJoined(peer.id, peer.name, peer.role)
+                });
+
+                resolve(roomData);
+            })
+        })
+    }
+
+    async leaveRoomPreview() {
+        return new Promise((resolve) => {
+            try {
+                if (this.socket && this.roomId) {
+                    console.log("call for leaving the room")
+                    this.socket.emit('leaveRoomPreview', { roomId: this.roomId }, () => {
+                        this.roomId = null;
+                        this.chatPeers.clear();
+                        resolve();
+                    });
+                } else {
+                    this.roomId = null;
+                    this.chatPeers.clear();
+                    resolve();
+                }
+            } catch (e) {
+                this.roomId = null;
+                this.chatPeers.clear();
+                resolve();
+            }
+        })
+    }
+
     async joinRoom(roomId, displayName, role = 'student') {
         if(!this.isConnected) {
             throw new Error('Not connected to signaling server');
@@ -81,8 +166,10 @@ class MediasoupClient {
         return new Promise((resolve, reject) => {
             this.socket.emit('joinRoom', {roomId, name: displayName, role}, async (response) => {
                 if(response.error) {
+                    // console.log("error in Mediasoupclient.js0")
                     return reject(new Error(response.error));
                 }
+                console.log("error in Mediasoupclient.js1")
 
                 this.roomId = roomId;
                 this.displayName = displayName;
@@ -372,6 +459,24 @@ class MediasoupClient {
             consumer.close();
         }
         this.consumers.clear();
+    }
+
+    sendChatMessage(message) {
+        if (!this.roomId) {
+          throw new Error('No roomId, Not in a room');
+        }
+
+        console.log(message)
+        
+        this.socket.emit('chatMessage', {
+          roomId: this.roomId,
+          message,
+          sender: {
+            id: this.peerId,
+            name: this.displayName,
+            role: this.role
+          }
+        });
     }
 }
 

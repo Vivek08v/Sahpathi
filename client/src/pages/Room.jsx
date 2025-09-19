@@ -4,6 +4,7 @@ import MediasoupClient from "../services/MediasoupClient";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { roomSlice } from "../redux/slices/roomSlice";
+import Chatbox from "../components/Chatbox";
 
 const Room = () => {
   const { roomId } = useParams();
@@ -100,7 +101,6 @@ const Room = () => {
 
   return (
     <div className="flex flex-wrap">
-      <div><button onClick={classEndHandler}>End Class</button></div>
       <div>
         {/* Local video */}
         {localStream && <VideoPlayer stream={localStream} muted={true} />}
@@ -111,6 +111,11 @@ const Room = () => {
           console.log(peerId, tracks)
           return <VideoPlayer key={peerId} stream={stream} muted={true} />
         })}
+      </div>
+      <div><button onClick={classEndHandler}>Leave Class</button></div>
+
+      <div>
+        <Chatbox/>
       </div>
     </div>
   );
