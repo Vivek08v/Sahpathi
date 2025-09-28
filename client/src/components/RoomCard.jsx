@@ -1,3 +1,79 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+
+const getColor = {
+  Ongoing: "bg-green-400",
+  Completed: "bg-blue-400",
+  Scheduled: "bg-yellow-400",
+  Searching: "bg-purple-400",
+  Cancelled: "bg-red-400",
+};
+
+const RoomCard = ({ room }) => {
+  const navigate = useNavigate();
+
+  const enterRoomPreview = () => {
+    navigate(`/room/preview/${room.classId}`)
+  }
+
+  return (
+    <div onClick={enterRoomPreview}
+      className={`shadow-lg rounded-3xl overflow-hidden min-w-[200px] max-w-[260px] cursor-pointer transform transition hover:scale-105 hover:shadow-2xl`}
+    >
+      {/* Image with gradient overlay */}
+      <div className="relative">
+        <img
+          src="https://placehold.co/400x200/png"
+          alt="Classroom"
+          className="w-full h-44 object-cover"
+        />
+        <span
+          className={`${getColor[room.status] || "bg-gray-400"} absolute top-3 left-3 px-3 py-1 rounded-full text-white font-semibold text-sm shadow-md`}
+        >
+          {room.status}
+        </span>
+      </div>
+
+      <div className="p-4 bg-white">
+        <h3 className="text-lg font-bold mb-2">{room.classname}</h3>
+
+        <div className="text-sm text-gray-600 space-y-1 mb-4">
+          <p>
+            Category: <span className="font-medium">{room.category || "N/A"}</span>
+          </p>
+          <p>
+            Type: <span className="font-medium">{room.classtype || "N/A"}</span>
+          </p>
+          <p>
+            Peoples Joined: <span className="font-medium">{room.participants.size || "0"}</span>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default RoomCard;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import React from 'react'
 // import { useNavigate } from 'react-router-dom';
 
@@ -46,77 +122,3 @@
 // }
 
 // export default RoomCard;
-
-
-
-
-
-
-
-
-
-
-
-
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { setRole } from "../redux/slices/roomSlice";
-import { useDispatch } from "react-redux";
-
-// You can expand colors for more statuses
-const getColor = {
-  Ongoing: "bg-green-400",
-  Completed: "bg-blue-400",
-  Scheduled: "bg-yellow-400",
-  Searching: "bg-purple-400",
-  Cancelled: "bg-red-400",
-};
-
-const RoomCard = ({ room }) => {
-  const navigate = useNavigate();
-
-  const enterRoomPreview = () => {
-    // set Room
-    navigate(`/room/preview/${room.classId}`)
-  }
-
-  return (
-    <div onClick={enterRoomPreview}
-      className={`shadow-lg rounded-3xl overflow-hidden min-w-[260px] max-w-[300px] cursor-pointer transform transition hover:scale-105 hover:shadow-2xl`}
-    >
-      {/* Image with gradient overlay */}
-      <div className="relative">
-        <img
-          src="https://placehold.co/400x200/png"
-          alt="Classroom"
-          className="w-full h-44 object-cover"
-        />
-        <span
-          className={`${getColor[room.status] || "bg-gray-400"} absolute top-3 left-3 px-3 py-1 rounded-full text-white font-semibold text-sm shadow-md`}
-        >
-          {room.status}
-        </span>
-      </div>
-
-      {/* Card content */}
-      <div className="p-4 bg-white">
-        <h3 className="text-lg font-bold mb-2">{room.classname}</h3>
-
-        <div className="text-sm text-gray-600 space-y-1 mb-4">
-          <p>
-            Category: <span className="font-medium">{room.category || "N/A"}</span>
-          </p>
-          <p>
-            Type: <span className="font-medium">{room.classtype || "N/A"}</span>
-          </p>
-          <p>
-            Peoples Joined: <span className="font-medium">{room.participants.size || "0"}</span>
-          </p>
-        </div>
-
-      </div>
-    </div>
-  );
-};
-
-export default RoomCard;

@@ -13,7 +13,7 @@ const RoomPreview = () => {
 
   const [room, setRoom] = useState("");
   const [peers, setPeers] = useState([]);
-  const [chats, setChats] = useState([{message: "", sender: ""}]);
+  const [chats, setChats] = useState([]);
   const [page, setPage] = useState(1);
 
   const [form, setForm] = useState({message: ""});
@@ -113,7 +113,7 @@ const RoomPreview = () => {
         <div>
           <div>Chats</div>
           <div>
-            {chats.length!==0 && chats.map((chat, i) => (
+            {chats && chats.map((chat, i) => (
               <div key={i} className={chat.sender.role === "Teacher" ? "bg-amber-700" : chat.sender.id === MediasoupClient.peerId ? "bg-amber-200" : "bg-green-200"}>
                 {`${chat.sender.name} -> ${chat.message}`}
               </div>

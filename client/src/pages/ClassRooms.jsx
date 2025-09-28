@@ -1,22 +1,28 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Users, Calendar, Search, Clock, CheckCircle, Plus } from "lucide-react";
+
 import RoomService from "../services/RoomService";
 import RoomCard from "../components/RoomCard";
 
 const ClassRooms = () => {
-  const [activeTab, setActiveTab] = useState("all");
-  const [allRooms, setAllRooms] = useState([]);
+  const [mainTab, setMainTab] = useState("all");
+  const [subTab, setSubTab] = useState("searching");
+  // const [activeTab, setActiveTab] = useState("all");
+  const [allRoomsIncMine, setAllRoomsIncMine] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  
   const navigate = useNavigate();
+  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   const getAllRooms = async () => {
     setLoading(true);
     const allRooms = await RoomService.getRoomsAPI();
-    const rooms = Object.fromEntries(
-      Object.entries(allRooms).map(([key, arr]) => [key, arr.slice().reverse()])
-    );
-    setAllRooms(rooms);
+    // const rooms = Object.fromEntries(
+    //   Object.entries(allRooms).map(([key, arr]) => [key, arr.slice().reverse()])
+    // );
+    console.log(allRooms)
+    setAllRoomsIncMine(allRooms);
     setLoading(false);
   };
 
@@ -24,84 +30,117 @@ const ClassRooms = () => {
     getAllRooms();
   }, []);
 
+  const subTabs = [
+    { key: "searching", label: "Searching", icon: <Search size={18} /> },
+    { key: "scheduled", label: "Scheduled", icon: <Calendar size={18} /> },
+    { key: "ongoing", label: "Ongoing", icon: <Clock size={18} /> },
+    { key: "completed", label: "Completed", icon: <CheckCircle size={18} /> },
+  ];
+
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">All ClassRooms</h1>
+    <div className="w-full">
+      <div className="flex justify-center gap-16 py-6 bg-gray-100">
+        <button
+          onClick={() => setMainTab("all")}
+          className={`flex flex-col items-center text-lg font-semibold transition-colors ${
+            mainTab === "all"
+              ? "text-green-600"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <Users size={28} />
+          <span>All Classes</span>
+        </button>
+        <button
+          onClick={() => setMainTab("my")}
+          className={`flex flex-col items-center text-lg font-semibold transition-colors ${
+            mainTab === "my"
+              ? "text-green-600"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <Calendar size={28} />
+          <span>My Classes</span>
+        </button>
+      </div>
+
+      <div className="flex justify-center border-b border-gray-200 bg-gray-100">
+        {subTabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setSubTab(tab.key)}
+            className={`relative px-6 py-3 text-sm font-semibold flex items-center gap-2 transition-colors ${
+              subTab === tab.key
+                ? "text-green-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+            {subTab === tab.key && (
+              <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-green-600 rounded-t" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="absolute top-12 right-6">
         <button
           onClick={() => navigate("/classrooms/create-new-class")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-md transition"
+          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
         >
-          Create New Class
+          <Plus size={18} />
+          <span>Add New Class</span>
         </button>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-6 border-b mb-6">
-        <button
-          onClick={() => setActiveTab("all")}
-          className={`pb-2 text-lg font-medium ${
-            activeTab === "all"
-              ? "border-b-2 border-blue-600 text-blue-600"
-              : "text-gray-600"
-          }`}
-        >
-          All Classes
-        </button>
-        <button
-          onClick={() => setActiveTab("my")}
-          className={`pb-2 text-lg font-medium ${
-            activeTab === "my"
-              ? "border-b-2 border-blue-600 text-blue-600"
-              : "text-gray-600"
-          }`}
-        >
-          My Classes
-        </button>
-      </div>
+      <div className="p-6 text-gray-700">
+        {loading && <div>Loading...</div>}
 
-      {loading && <div>
-        loading
-      </div>}
-
-      {/* Tab Content */}
-      {!loading && activeTab === "my" && (
-        <div>
-          <h2 className="text-xl font-semibold mb-3">My Rooms</h2>
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {allRooms["MyRooms"]?.length > 0 ? (
-              allRooms["MyRooms"].map((room, i) => <RoomCard key={i} room={room}/> )
-            ) : (
-              <p className="text-gray-500">No rooms yet</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {!loading && activeTab === "all" && (
-        <div>
-          {Object.keys(allRooms).map((status, i) =>
-            status !== "MyRooms" && (
-              <div key={i} className="mb-6">
-                <h2 className="text-xl font-semibold mb-3">{status}</h2>
-                <div className="flex gap-4 overflow-x-auto pb-2">
-                  {allRooms[status]?.length > 0 ? (
-                    allRooms[status].map((room, i) => <RoomCard key={i} room={room}/>)
+        {!loading && (
+          <div>
+            {mainTab === "my" ? (
+              <div>
+                <h2 className="text-xl font-semibold mb-3">
+                  {subTabs.find((t) => t.key === subTab)?.label}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                  {allRoomsIncMine?.myRooms?.[capitalize(subTab)]?.length > 0 ? (
+                    allRoomsIncMine.myRooms[capitalize(subTab)].map((room, i) => (
+                      <RoomCard key={i} room={room} />
+                    ))
                   ) : (
                     <p className="text-gray-500">
-                      No {status.toLowerCase()} rooms
+                      No {subTab} rooms
                     </p>
                   )}
                 </div>
               </div>
-            )
-          )}
-        </div>
-      )}
+            ) : (
+              <div>
+                <h2 className="text-xl font-semibold mb-3">
+                  {subTabs.find((t) => t.key === subTab)?.label}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                  {allRoomsIncMine?.allRooms?.[capitalize(subTab)]?.length > 0 ? (
+                    allRoomsIncMine.allRooms[capitalize(subTab)].map((room, i) => (
+                      <RoomCard key={i} room={room} />
+                    ))
+                  ) : (
+                    <p className="text-gray-500">
+                      No {subTab} rooms
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      
     </div>
   );
-};
+}
 
 export default ClassRooms;
 
@@ -123,217 +162,119 @@ export default ClassRooms;
 
 
 
-// import React, { useEffect, useState } from 'react'
-// import {useNavigate} from 'react-router-dom';
-// import RoomService from '../services/RoomService';
-// import { useSelector } from 'react-redux';
-
-// const ClassRooms = () => {
-//   const [title, setTitle] = useState('');
-//   const [loading, setLoading] = useState(false);
-//   const [allRooms, setAllRooms] = useState([]);
-//   const [error, setError] = useState('');
-//   const {user} = useSelector((state)=> state.userSlice)
-
-//   const navigate = useNavigate();
-  
-//   const getAllRooms = async() => {
-//     setLoading(true);
-//     const allRooms = await RoomService.getRoomsAPI();
-//     setAllRooms(allRooms);
-//     console.log(allRooms);
-//     setLoading(false);
-//   }
-
-//   useEffect(()=> {
-//     getAllRooms();
-//   }, [])
-
-//   return (
-//     <div>
-//         <div>
-//           ClassRooms
-//           <button onClick={()=>navigate("/classrooms/create-new-class")}>Create New ClassRoom</button>
-//         </div>
-
-//         {/*Classes*/}
-//         <div>
-//           <div>
-//             <div>My Rooms</div>
-//             <div>
-//               {allRooms && allRooms["MyRooms"]?.map((room, i) => (
-//                 <div key={i} onClick={()=>navigate(`/room/${room.classId}`)}>
-//                   {room.classname} {"--->"} {room.status}
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-          
-//           <div>
-//             {Object.keys(allRooms).map((status, i) => (
-//               status !== "MyRooms" ?
-//               <div key={i}>
-//                 <div>{status}</div>
-//                 <div>
-//                   {allRooms && allRooms[status]?.map((room, i) => (
-//                     <div key={i} onClick={()=>navigate(`/room/${room.classId}`)}>
-//                       {room.classname} {"--->"} {room.status}
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div>
-//               : null
-//             ))}
-//           </div>
-//         </div>
-//     </div>
-//   )
-// }
-
-// export default ClassRooms
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom";
 // import RoomService from "../services/RoomService";
-// import { useSelector } from "react-redux";
+// import RoomCard from "../components/RoomCard";
 
 // const ClassRooms = () => {
-//   const [activeTab, setActiveTab] = useState("all"); // "all" | "my"
-//   const [allRooms, setAllRooms] = useState([]);
+//   const [activeTab, setActiveTab] = useState("all");
+//   const [allRoomsIncMine, setAllRoomsIncMine] = useState([]);
 //   const [loading, setLoading] = useState(false);
-//   const { user } = useSelector((state) => state.userSlice);
 
 //   const navigate = useNavigate();
 
 //   const getAllRooms = async () => {
 //     setLoading(true);
 //     const allRooms = await RoomService.getRoomsAPI();
-//     setAllRooms(allRooms);
+//     // const rooms = Object.fromEntries(
+//     //   Object.entries(allRooms).map(([key, arr]) => [key, arr.slice().reverse()])
+//     // );
+//     setAllRoomsIncMine(allRooms);
 //     setLoading(false);
 //   };
+//   // console.log(allRooms)
 
 //   useEffect(() => {
 //     getAllRooms();
 //   }, []);
 
 //   return (
-//     <div style={{ padding: "20px" }}>
+//     <div className="p-6">
 //       {/* Header */}
-//       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-//         <h1>All ClassRooms</h1>
-//         <button onClick={() => navigate("/classrooms/create-new-class")}>
-//           Create New ClassRoom
+//       <div className="flex justify-between items-center mb-6">
+//         <h1 className="text-3xl font-bold">All ClassRooms</h1>
+//         <button
+//           onClick={() => navigate("/classrooms/create-new-class")}
+//           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-md transition"
+//         >
+//           Create New Class
 //         </button>
 //       </div>
 
 //       {/* Tabs */}
-//       <div style={{ marginTop: "20px", marginBottom: "20px", display: "flex", gap: "20px" }}>
+//       <div className="flex gap-6 border-b mb-6">
 //         <button
 //           onClick={() => setActiveTab("all")}
-//           style={{
-//             borderBottom: activeTab === "all" ? "2px solid black" : "2px solid transparent",
-//             padding: "10px",
-//             cursor: "pointer",
-//             background: "none",
-//           }}
+//           className={`pb-2 text-lg font-medium ${
+//             activeTab === "all"
+//               ? "border-b-2 border-blue-600 text-blue-600"
+//               : "text-gray-600"
+//           }`}
 //         >
 //           All Classes
 //         </button>
 //         <button
 //           onClick={() => setActiveTab("my")}
-//           style={{
-//             borderBottom: activeTab === "my" ? "2px solid black" : "2px solid transparent",
-//             padding: "10px",
-//             cursor: "pointer",
-//             background: "none",
-//           }}
+//           className={`pb-2 text-lg font-medium ${
+//             activeTab === "my"
+//               ? "border-b-2 border-blue-600 text-blue-600"
+//               : "text-gray-600"
+//           }`}
 //         >
 //           My Classes
 //         </button>
 //       </div>
 
-//       {/* Tab Content */}
-//       <div>
-//         {activeTab === "my" && (
-//           <div>
-//             <h2>My Rooms</h2>
-//             <div style={{ display: "flex", gap: "15px", overflowX: "auto", padding: "10px 0" }}>
-//               {allRooms["MyRooms"]?.length > 0 ? (
-//                 allRooms["MyRooms"].map((room, i) => (
-//                   <div
-//                     key={i}
-//                     onClick={() => navigate(`/room/${room.classId}`)}
-//                     style={{
-//                       border: "1px solid #ccc",
-//                       padding: "15px",
-//                       minWidth: "200px",
-//                       cursor: "pointer",
-//                     }}
-//                   >
-//                     {room.classname} {"--->"} {room.status}
-//                   </div>
-//                 ))
-//               ) : (
-//                 <p>No rooms yet</p>
-//               )}
-//             </div>
-//           </div>
-//         )}
+//       {loading && <div>
+//         loading
+//       </div>}
 
-//         {activeTab === "all" && (
-//           <div>
-//             {Object.keys(allRooms).map(
-//               (status, i) =>
-//                 status !== "MyRooms" && (
-//                   <div key={i} style={{ marginBottom: "20px" }}>
-//                     <h2>{status}</h2>
-//                     <div style={{ display: "flex", gap: "15px", overflowX: "auto", padding: "10px 0" }}>
-//                       {allRooms[status]?.length > 0 ? (
-//                         allRooms[status].map((room, j) => (
-//                           <div
-//                             key={j}
-//                             onClick={() => navigate(`/room/${room.classId}`)}
-//                             style={{
-//                               border: "1px solid #ccc",
-//                               padding: "15px",
-//                               minWidth: "200px",
-//                               cursor: "pointer",
-//                             }}
-//                           >
-//                             {room.classname} {"--->"} {room.status}
-//                           </div>
-//                         ))
-//                       ) : (
-//                         <p>No {status.toLowerCase()} rooms</p>
-//                       )}
-//                     </div>
-//                   </div>
-//                 )
-//             )}
-//           </div>
-//         )}
-//       </div>
+//       {/* Tab Content */}
+
+//       {!loading && activeTab === "my" && (
+//         <div>
+//           {allRoomsIncMine && allRoomsIncMine.myRooms && Object.keys(allRoomsIncMine.myRooms).map((status, i) => (
+//               <div key={i} className="mb-6">
+//                 <h2 className="text-xl font-semibold mb-3">{status}</h2>
+//                 <div className="flex gap-4 overflow-x-auto pb-2">
+//                   {allRoomsIncMine.myRooms[status]?.length > 0 ? (
+//                     allRoomsIncMine.myRooms[status].map((room, i) => <RoomCard key={i} room={room}/>)
+//                   ) : (
+//                     <p className="text-gray-500">
+//                       No {status.toLowerCase()} rooms
+//                     </p>
+//                   )}
+//                 </div>
+//               </div>
+//             )
+//           )}
+//         </div>
+//       )}
+
+
+//       {!loading && activeTab === "all" && (
+//         <div>
+//           {allRoomsIncMine && allRoomsIncMine?.allRooms && Object.keys(allRoomsIncMine.allRooms).map((status, i) => (
+//               <div key={i} className="mb-6">
+//                 <h2 className="text-xl font-semibold mb-3">{status}</h2>
+//                 <div className="flex gap-4 overflow-x-auto pb-2">
+//                   {allRoomsIncMine.allRooms[status]?.length > 0 ? (
+//                     allRoomsIncMine.allRooms[status].map((room, i) => <RoomCard key={i} room={room}/>)
+//                   ) : (
+//                     <p className="text-gray-500">
+//                       No {status.toLowerCase()} rooms
+//                     </p>
+//                   )}
+//                 </div>
+//               </div>
+//             )
+//           )}
+//         </div>
+//       )}
 //     </div>
 //   );
 // };
