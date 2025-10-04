@@ -57,15 +57,20 @@ export const getAllRooms = async(req, res) => {
 export const getRoom = async(req, res) => {
     try{
         const { id } = req.params;
-        console.log("hii1");
-        const roomsInMemory = RoomsManager.getRooms();
-        console.log(id);
-        console.log(roomsInMemory);
-        const room = roomsInMemory.filter((room) => room.id === id);
+        // const roomsInMemory = RoomsManager.getRooms();
+        // console.log(id);
+        // console.log(roomsInMemory);
+        // const room = roomsInMemory.filter((room) => room.id === id);
         
-        console.log("hii3");
-        console.log(room);
-        if(room && room.length===0){
+        const room = await Classroom.findOne({ classId: id })
+                    .populate({
+                      path: "participants.user",
+                      select: "username avatar role",
+                    })
+                    .populate("createdBy", "username avatar");
+                  
+        console.log("Hi Room:",room);
+        if(room && room.length===0){  // remove room.length === 0
             return res.status(200).json({
                 success: false,
                 message: "API Failed: Room Not Found"
@@ -74,7 +79,7 @@ export const getRoom = async(req, res) => {
         
         return res.status(200).json({
             success: true,
-            data: room[0],
+            data: room,
             message: "API Success: Got the room..."
         })
     }

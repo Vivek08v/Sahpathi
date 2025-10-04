@@ -16,18 +16,15 @@ const VideoPlayer = ({ stream, muted = false }) => {
       tryPlay();
     }
   }, [stream]);
-  // console.log("hhhhhhhhhh")
+  
   return (
-    <div className="w-1/2 p-2">
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted={muted}
-        className="w-full h-48 bg-black rounded"
-      />
-      {/* <div>{"->"} - {role}</div> */}
-    </div>
+    <video
+      ref={videoRef}
+      autoPlay
+      playsInline
+      muted={muted}
+      className="w-full h-48 bg-black rounded-t"
+    />
   );
 };
 

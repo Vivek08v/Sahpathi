@@ -22,6 +22,8 @@ class MediasoupClient {
         this.onChatPeerClosed = null;
         this.onNewConsumer = null;
         this.onChatMessage = null;
+        // this.peersVideoOn = new Map();  // in room instead
+        this.onRemoteVideoToggle = null;
         //
     }
 
@@ -46,9 +48,10 @@ class MediasoupClient {
             console.log("New chat peer joined: ", name, peerId, role);
 
             this.chatPeers.set(peerId, {id: peerId, name, role});
-
+            let type;
+            
             if(this.onChatPeerJoined){
-                this.onChatPeerJoined(peerId, name, role);
+                this.onChatPeerJoined(peerId, name, role, type="new");
             }
         })
 
@@ -83,6 +86,13 @@ class MediasoupClient {
             this.peers.delete(peerId);
           }
         });
+
+        this.socket.on('videoToggle', ({peerId, isVideoOn}) => {
+            if(this.onRemoteVideoToggle){
+                console.log("Toggle client come");
+                this.onRemoteVideoToggle(peerId, isVideoOn);
+            }
+        })
 
         this.socket.on('newProducer', ({ peerId, producerId, kind }) => {
             console.log("New Producer: ", peerId, producerId ,kind);
@@ -124,10 +134,11 @@ class MediasoupClient {
                 
                 const { roomData } = response;
                 console.log("response:", roomData)
+                let type;
 
                 roomData.chatPeers.forEach(peer => {
                     this.chatPeers.set(peer.id, peer);
-                    this.onChatPeerJoined(peer.id, peer.name, peer.role)
+                    this.onChatPeerJoined(peer.id, peer.name, peer.role, type="exising")
                 });
 
                 resolve(roomData);
@@ -461,6 +472,15 @@ class MediasoupClient {
         this.consumers.clear();
     }
 
+    onVideoToggle(isVideoOn){
+        if(!this.roomId){
+            throw new Error("No roomId, Not in a room");
+        }
+        
+        console.log("Toggle client go");
+        this.socket.emit('videoToggle', {roomId: this.roomId, peerId: this.peerId, isVideoOn});
+    }
+
     sendChatMessage(message) {
         if (!this.roomId) {
           throw new Error('No roomId, Not in a room');
@@ -475,8 +495,10 @@ class MediasoupClient {
             id: this.peerId,
             name: this.displayName,
             role: this.role
-          }
-        });
+          },
+          },
+        //   () => {console.log("emitting")}
+        );
     }
 }
 

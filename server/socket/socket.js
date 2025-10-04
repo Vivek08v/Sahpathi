@@ -308,6 +308,13 @@ io.on('connection', (socket) => {
         timestamp: new Date().toISOString() 
       });
     });
+
+
+    // video toggle
+    socket.on('videoToggle', ({roomId, peerId, isVideoOn}) => {
+        console.log("Toggle server");
+        io.to(roomId).emit('videoToggle', {peerId, isVideoOn})
+    })
 })
 
 export {app, server, io};

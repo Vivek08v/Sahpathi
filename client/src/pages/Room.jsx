@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
+import { BsFillMicMuteFill, BsFillMicFill } from "react-icons/bs";
+import { FaVideoSlash, FaVideo } from "react-icons/fa";
+import toast from 'react-hot-toast';
 import VideoPlayer from "../components/VideoPlayer";
 import MediasoupClient from "../services/MediasoupClient";
 import { useNavigate, useParams } from "react-router-dom";
@@ -11,37 +14,80 @@ const Room = () => {
   const navigate = useNavigate();
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState({});
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
+  const [peersVideoOn, setIsPeersVideoOn] = useState(null);
+  const { user } = useSelector((state) => state.userSlice);
 
   const localStreamRef = useRef(null);
 
   const { isInitialized} = useSelector((state)=> state.userSlice);
   const { role } = useSelector((state) => state.roomSlice);
 
+  const toggleMute = () => {
+    if (localStream) {
+      const audioTrack = localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsMuted(!audioTrack.enabled);
+      }
+    }
+  };
+  
+  const toggleVideo = () => {
+    if (localStream) {
+      const videoTrack = localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        MediasoupClient.onVideoToggle(isVideoOff); // socket call
+
+        videoTrack.enabled = !videoTrack.enabled;
+        setIsVideoOff(!videoTrack.enabled); // is muted is always negative of actual answer
+      }
+    }
+  };
+  
+  const classEndHandler = async () => {
+    try {
+      await MediasoupClient.leaveRoom();
+    } finally {
+      navigate('/classrooms');
+    }
+  }
+
   useEffect(() => {
     const join = async () => {
       try {
         console.log("Joining room:", roomId, role);
-        const roomData = await MediasoupClient.joinRoom(roomId, "Vivek", role);  // to be changed
+        const roomData = await MediasoupClient.joinRoom(roomId, user.fullname, role);  // to be changed
         console.log("Room data:", roomData);
 
         // New consumer → add its stream to list
         MediasoupClient.onNewConsumer = ({ consumer, peerId, kind }) => {
           console.log("➡️ New consumer:", peerId, kind, consumer);
 
-          if (kind === 'video' || kind === 'audio') {
-            const stream = new MediaStream();
-            stream.addTrack(consumer.track);
-
-            setRemoteStreams(prev => ({
+          if(kind === 'video'){
+            setIsPeersVideoOn((prev) => ({
               ...prev,
-              [peerId]: {
-                ...prev[peerId],
-                [kind]: stream,
-                consumer
+              [peerId] : true
+            }))
+          }
+
+          if (kind === 'video' || kind === 'audio') {
+            setRemoteStreams(prev => {
+              const stream = prev[peerId]?.stream || new MediaStream();
+              stream.addTrack(consumer.track);
+
+              return {
+              ...prev,
+                [peerId]: { stream }
               }
-            }));
+            });
           }
         };
+
+        MediasoupClient.onPeerJoined = (peerId, name, role) => {
+          toast.success(`New Peer(${role}) Joined -> ${name} ${peerId}`);
+        }
 
         // Peer closed → remove its streams
         MediasoupClient.onPeerClosed = (peerId) => {
@@ -50,7 +96,16 @@ const Room = () => {
             delete next[peerId];
             return next;
           });
+          
+          toast.success('Peer Left');
         };
+
+        MediasoupClient.onRemoteVideoToggle = (peerId, isVideoOn) => {
+          setIsPeersVideoOn((prev) => ({
+            ...prev,
+            [peerId] : isVideoOn
+          }))
+        }
 
         // get local media
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -89,33 +144,79 @@ const Room = () => {
       }
       MediasoupClient.leaveRoom();
     };
-  }, [roomId], [isInitialized]);
-
-  const classEndHandler = async () => {
-    try {
-      await MediasoupClient.leaveRoom();
-    } finally {
-      navigate('/classrooms');
-    }
-  }
+  }, [roomId, isInitialized]);
 
   return (
-    <div className="flex flex-wrap">
-      <div>
-        {/* Local video */}
-        {localStream && <VideoPlayer stream={localStream} muted={true} />}
-
-        {/* Remote videos */}
-        {Object.entries(remoteStreams).map(([peerId, tracks]) => {
-          const stream = tracks.video || tracks.audio;
-          console.log(peerId, tracks)
-          return <VideoPlayer key={peerId} stream={stream} muted={true} />
-        })}
+    <div className="flex-col flex-wrap">
+      <div className="w-full flex justify-around bg-green-200">
+        <div>Room-Id: {roomId}</div>
+        <div className="bg-red-600 border-2 rounded">
+          <button onClick={classEndHandler}>Leave Class</button>
+        </div>
       </div>
-      <div><button onClick={classEndHandler}>Leave Class</button></div>
 
-      <div>
-        <Chatbox/>
+      <div className="flex">
+        <div className="flex basis-2/3">
+        {console.log(peersVideoOn)}
+          
+          {/* local Stream */}
+          {localStream && 
+            <div className="p-2 bg-gray-200">
+              <div className="w-full">
+                {!isVideoOff ? 
+                  <VideoPlayer stream={localStream} muted={false} /> : 
+                  <>Video is Off</>
+                }
+                
+                <div className="w-full bg-red-200 flex justify-between items-center gap-2 rounded-b px-2 py-1">
+                  <div className="bg-blue-300 flex gap-2 px-2 py-1 rounded">
+                    <div onClick={toggleMute}>
+                      {isMuted ? <BsFillMicMuteFill/> : <BsFillMicFill />}
+                    </div>
+                    <div onClick={toggleVideo}>
+                      {isVideoOff ? <FaVideoSlash/> : <FaVideo />}
+                    </div>
+                  </div>
+                  <div>{user.fullname} {"["+role+"]"}</div>
+                </div>
+              </div>
+            </div>
+          }
+
+          {Array.from(MediasoupClient.peers.values()).map((peer) => {
+            // local Stream
+            if(peer.id === MediasoupClient.peerId){
+              return;
+            }
+
+            const stream = remoteStreams[peer.id]?.stream;
+            // console.log(remoteStreams)
+            // console.log("audio Tracks: ",stream?.getAudioTracks()?.length)
+            // console.log("video Tracks: ",stream?.getVideoTracks()?.length)
+
+            // const videoTrack = stream?.getVideoTracks()[0]; // very I.M.P
+            // const isVideoEnabled = videoTrack?.enabled;
+
+            return (
+              <div className="p-2 bg-gray-200">
+                <div className="w-full">
+                  {(peersVideoOn && peersVideoOn[peer.id]) ? 
+                    <VideoPlayer key={peer.id} stream={stream} muted={false} /> : 
+                    <>Video is Off</>
+                  }
+                  
+                  <div className="w-full bg-red-200 flex justify-between items-center gap-2 rounded-b px-2 py-1">
+                    <div>{peer.name} {"["+peer.role+"]"}</div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <div className="bg-gray-200 basis-1/3 border-2 rounded">
+          <Chatbox/>
+        </div>
       </div>
     </div>
   );

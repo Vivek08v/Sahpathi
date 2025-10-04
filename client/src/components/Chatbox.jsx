@@ -32,7 +32,7 @@ const Chatbox = () => {
 
     return (
         <div>
-            <div>Chatbox</div>
+            <div className='bg-yellow-200'>Chatbox</div>
             <div>
                 {chats.length!==0 && chats.map((chat, i)=>
                     <div key={i}>
@@ -41,8 +41,8 @@ const Chatbox = () => {
                 )}
             </div>
             <form onSubmit={sendHandler}>
-                <input type='text' name='message' value={form.message} onChange={changeHandler}></input>
-                <button type='submit'>Send</button>
+                <input type='text' name='message' value={form.message} onChange={changeHandler} className='border-2 rounded'></input>
+                <button type='submit' className='border-2 rounded bg-blue-300'>Send</button>
             </form>
         </div>
     )

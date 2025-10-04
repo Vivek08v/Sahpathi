@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Toaster } from 'react-hot-toast'
 import { Route, Routes } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux"
 import { setInitialized } from './redux/slices/userSlice'
@@ -77,6 +78,10 @@ function App() {
           <Route path='/room/:roomId' element={<ProtectedRoute> <Room/> </ProtectedRoute>}/>
         </Routes>
       </div>
+
+      <>
+        <Toaster position="top-right" reverseOrder={false} />
+      </>
     </>
   )
 }
