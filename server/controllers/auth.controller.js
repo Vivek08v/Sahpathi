@@ -1,10 +1,11 @@
 import { User } from "../models/user.model.js";
+import { uploadToCloudinary } from "../utlis/cloudinary.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 export const signUp = async(req, res) => {
     try{
-        const {email, fullname, username, password} = req.body;
+        const {email, fullname, username, image, password} = req.body;
         if(!email || !fullname || !username || !password){
             return res.status(401).json({
                 success: false,
@@ -12,11 +13,18 @@ export const signUp = async(req, res) => {
             })
         }
 
+        let imageUrl = null;
+        if (req.file) {
+            imageUrl = await uploadToCloudinary(req.file.path, "user_profiles");
+            fs.unlinkSync(req.file.path);
+        }
+
         const hashedPass = await bcrypt.hash(password, 10);
         const user = await User.create({
             email,
             fullname, 
             username,
+            avatar: imageUrl,
             password: hashedPass,
         });
 
@@ -27,11 +35,35 @@ export const signUp = async(req, res) => {
             })
         }
 
+        const accessToken = jwt.sign(
+            {id: user._id,username: user.username, email: user.email, role: user.role},
+            process.env.jwt_PASSWORD,
+            { expiresIn: "5m" }
+        )
+        const refreshToken = jwt.sign(
+            {id: user._id, username: user.username, email: user.email, role: user.role},
+            process.env.jwt_PASSWORD,
+            { expiresIn: "7d" }
+        )
+
+        const options = {
+            expires: new Date(Date.now() + 7*24*60*60*1000),
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false
+        }
+
+        user.refreshToken = refreshToken;
+        await user.save();
+
         user.password = undefined;
-        return res.status(200).json({
-            success: true,
-            data: user,
-            message: "user signedUp successfully"
+        return res.cookie("accessToken", accessToken, options)
+                  .cookie("refreshToken", refreshToken, options).status(200).json({
+                    success: true,
+                    data: user,
+                    // accessToken: accessToken,
+                    // refreshToken: refreshToken,
+                    message: "user signedUp successfully"
         })
     }
     catch(error){
@@ -100,7 +132,7 @@ export const login = async(req, res) => {
                     data: user,
                     // accessToken: accessToken,
                     // refreshToken: refreshToken,
-                    message: "user signedUp successfully"
+                    message: "user loggedIn successfully"
         })
     }
     catch(error){

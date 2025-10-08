@@ -56,9 +56,11 @@ const Room = () => {
 
   useEffect(() => {
     const join = async () => {
+      const currUser = {"fullname": user.fullname, "userId": user._id, "username": user.username}
+      console.log(currUser)
       try {
         console.log("Joining room:", roomId, role);
-        const roomData = await MediasoupClient.joinRoom(roomId, user.fullname, role);  // to be changed
+        const roomData = await MediasoupClient.joinRoom(roomId, currUser, role);  // to be changed
         console.log("Room data:", roomData);
 
         // New consumer → add its stream to list
@@ -85,8 +87,8 @@ const Room = () => {
           }
         };
 
-        MediasoupClient.onPeerJoined = (peerId, name, role) => {
-          toast.success(`New Peer(${role}) Joined -> ${name} ${peerId}`);
+        MediasoupClient.onPeerJoined = (peerId, userDetail, role) => {
+          toast.success(`New Peer(${role}) Joined -> ${userDetail.fullname} ${peerId}`);
         }
 
         // Peer closed → remove its streams
@@ -157,7 +159,7 @@ const Room = () => {
 
       <div className="flex">
         <div className="flex basis-2/3">
-        {console.log(peersVideoOn)}
+        {/* {console.log(peersVideoOn)} */}
           
           {/* local Stream */}
           {localStream && 
@@ -182,23 +184,17 @@ const Room = () => {
               </div>
             </div>
           }
-
-          {Array.from(MediasoupClient.peers.values()).map((peer) => {
+          {console.log(MediasoupClient.peers)}
+          {Array.from(MediasoupClient.peers.values()).map((peer, i) => {
             // local Stream
             if(peer.id === MediasoupClient.peerId){
               return;
             }
-
+            console.log(peer)
             const stream = remoteStreams[peer.id]?.stream;
-            // console.log(remoteStreams)
-            // console.log("audio Tracks: ",stream?.getAudioTracks()?.length)
-            // console.log("video Tracks: ",stream?.getVideoTracks()?.length)
-
-            // const videoTrack = stream?.getVideoTracks()[0]; // very I.M.P
-            // const isVideoEnabled = videoTrack?.enabled;
 
             return (
-              <div className="p-2 bg-gray-200">
+              <div className="p-2 bg-gray-200" key={i}>
                 <div className="w-full">
                   {(peersVideoOn && peersVideoOn[peer.id]) ? 
                     <VideoPlayer key={peer.id} stream={stream} muted={false} /> : 
@@ -206,7 +202,7 @@ const Room = () => {
                   }
                   
                   <div className="w-full bg-red-200 flex justify-between items-center gap-2 rounded-b px-2 py-1">
-                    <div>{peer.name} {"["+peer.role+"]"}</div>
+                    <div>{peer?.userDetail?.fullname} {"["+peer.role+"]"}</div>
                   </div>
                 </div>
               </div>

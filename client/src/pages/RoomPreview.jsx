@@ -51,7 +51,8 @@ const RoomPreview = () => {
 
   const chatRoomJoinHandler = async() => {
     setLoading(true);
-    await MediasoupClient.joinRoomPreview(roomId, user.username, "Learner");  // Send imageuRl too
+    const currUser = {"fullname": user.fullname, "userId": user._id, "username": user.username}
+    await MediasoupClient.joinRoomPreview(roomId, currUser, "Learner");  // Send imageuRl too
     setPage(2);
     setLoading(false);
   }
@@ -78,10 +79,11 @@ const RoomPreview = () => {
     // 1 More than org no peers in socket peers
     // 2 function being called unnecessary
     // 3 function is common for both new peer as well as existing peers
-    MediasoupClient.onChatPeerJoined = (peerId, name, role, type) => {  // Get imageuRl too
+    MediasoupClient.onChatPeerJoined = (peerId, userDetail, role, type) => {  // Get imageuRl too
       console.log("Peer joined the chat room", MediasoupClient.peerId);
-      if(type==="new") toast.success(`New Peer Joined -> ${name}`)
-      setPeers((prev) => ([...prev, {peerId, name, role}]))
+      console.log(userDetail)
+      if(type==="new") toast.success(`New Peer Joined -> ${userDetail.fullname}`)
+      setPeers((prev) => ([...prev, {peerId, userDetail, role}]))
     }
 
     MediasoupClient.onChatPeerClosed = (peerId) => {
@@ -135,7 +137,7 @@ const RoomPreview = () => {
               <div>
                 {peers && peers.map((p, i) => (
                   <div key={i}>
-                    {p.name} {p.role}
+                    {p.userDetail.name} {p.role}
                   </div>
                 ))}
               </div>

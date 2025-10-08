@@ -43,15 +43,15 @@ class MediasoupClient {
             console.log('Disconnected from socket');
         })
 
-        this.socket.on('newChatPeer', ({ peerId, name, role }) => {  // chat peers
+        this.socket.on('newChatPeer', ({ peerId, userDetail, role }) => {  // chat peers
             console.log("........................................")
-            console.log("New chat peer joined: ", name, peerId, role);
+            console.log("New chat peer joined: ", userDetail, peerId, role);
 
-            this.chatPeers.set(peerId, {id: peerId, name, role});
+            this.chatPeers.set(peerId, {id: peerId, userDetail, role});
             let type;
             
             if(this.onChatPeerJoined){
-                this.onChatPeerJoined(peerId, name, role, type="new");
+                this.onChatPeerJoined(peerId, userDetail, role, type="new");
             }
         })
 
@@ -66,13 +66,13 @@ class MediasoupClient {
           }
         });
 
-        this.socket.on('newPeer', ({ peerId, name, role }) => {
-            console.log("New peer joined: ", name, peerId);
+        this.socket.on('newPeer', ({ peerId, userDetail, role }) => {
+            console.log("New peer joined: ", userDetail, peerId);
 
-            this.peers.set(peerId, {id: peerId, name, role});
+            this.peers.set(peerId, {id: peerId, userDetail, role});
 
             if(this.onPeerJoined){
-                this.onPeerJoined(peerId, name, role);
+                this.onPeerJoined(peerId, userDetail, role);
             }
         })
 
@@ -117,19 +117,19 @@ class MediasoupClient {
         }
     }
 
-    async joinRoomPreview(roomId, displayName, role = 'student') {
+    async joinRoomPreview(roomId, userDetail, role = 'student') {
         if(!this.isConnected) {
             throw new Error('Not connected to signaling server');
         }
 
         return new Promise((resolve, reject) => {
-            this.socket.emit('joinRoomPreview', {roomId, name: displayName, role}, async (response) => {
+            this.socket.emit('joinRoomPreview', {roomId, userDetail, role}, async (response) => {
                 if(response.error) {
                     return reject(new Error(response.error));
                 }
 
                 this.roomId = roomId;
-                this.displayName = displayName;
+                this.displayName = userDetail.fullname;
                 this.role = role;
                 
                 const { roomData } = response;
@@ -138,7 +138,8 @@ class MediasoupClient {
 
                 roomData.chatPeers.forEach(peer => {
                     this.chatPeers.set(peer.id, peer);
-                    this.onChatPeerJoined(peer.id, peer.name, peer.role, type="exising")
+                    console.log(peer)
+                    this.onChatPeerJoined(peer.id, peer.userDetail, peer.role, type="exising")
                 });
 
                 resolve(roomData);
@@ -169,13 +170,13 @@ class MediasoupClient {
         })
     }
 
-    async joinRoom(roomId, displayName, role = 'student') {
+    async joinRoom(roomId, userDetail, role = 'student') {
         if(!this.isConnected) {
             throw new Error('Not connected to signaling server');
         }
 
         return new Promise((resolve, reject) => {
-            this.socket.emit('joinRoom', {roomId, name: displayName, role}, async (response) => {
+            this.socket.emit('joinRoom', {roomId, userDetail, role}, async (response) => {
                 if(response.error) {
                     // console.log("error in Mediasoupclient.js0")
                     return reject(new Error(response.error));
@@ -183,11 +184,12 @@ class MediasoupClient {
                 console.log("error in Mediasoupclient.js1")
 
                 this.roomId = roomId;
-                this.displayName = displayName;
+                this.displayName = userDetail.fullname;
                 this.role = role;
 
                 const { roomData, routerRtpCapabilities } = response;
 
+                console.log("roomData ->>", roomData)
                 roomData.peers.forEach(peer => {
                     this.peers.set(peer.id, peer);
                 });
@@ -302,7 +304,7 @@ class MediasoupClient {
                                 return;
                             }
 
-                            callback({ id: response.id });
+                            callback({ id: response.id });  // ...
                         })
                     });
 

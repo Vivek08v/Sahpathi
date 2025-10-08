@@ -43,14 +43,14 @@ class Room {
         }
     }
 
-    addChatPeer(peerId, name, role){  // add chat peers
+    addChatPeer(peerId, userDetail, role){  // add chat peers
         if(this.chatPeers.has(peerId)){
             return this.chatPeers.get(peerId);
         }
 
         this.chatPeers.set(peerId, {
             id: peerId,
-            name,
+            userDetail,
             role,
             isConnected: false
         });
@@ -76,14 +76,14 @@ class Room {
         // console.log("Peers-left: ", Array.from(this.chatPeers).length)
     }
 
-    addPeer(peerId, name, role){
+    addPeer(peerId, userDetail, role){
         if(this.peers.has(peerId)){
             return this.peers.get(peerId);
         }
 
         this.peers.set(peerId, {
             id: peerId,
-            name,
+            userDetail: userDetail,
             role,
             transports: [],
             producers: [],
@@ -322,7 +322,21 @@ class Room {
             isTeacherAssigned: this.isTeacherAssigned,
             peers: Array.from(this.peers.values()).map(peer => ({
                 id: peer.id,
-                name: peer.name,
+                userDetail: peer.userDetail,
+                role: peer.role
+            })) 
+        }
+    }
+    toJSON2() {
+        return {
+            id: this.id,
+            title: this.title,
+            creatorId: this.creatorId,
+            teacher: this.teacher,
+            isTeacherAssigned: this.isTeacherAssigned,
+            chatPeers: Array.from(this.chatPeers.values()).map(peer => ({
+                id: peer.id,
+                userDetail: peer.userDetail,
                 role: peer.role
             })) 
         }

@@ -1,24 +1,47 @@
 import React, { useState } from 'react';
-import { Navigate, NavLink } from 'react-router-dom';
+import { Navigate, NavLink, useNavigate } from 'react-router-dom';
+import { signUpAPI } from '../services/operations/auth.service';
+import { useDispatch } from 'react-redux';
 
 export default function Signup() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    name: '',
+    fullname: '',
     email: '',
+    username: '',
+    image: '',
     password: '',
     confirmPassword: ''
   });
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const handleChange = (e) => {
-    setFormData({...formData, [e.target.name]: e.target.value});
+    if(e.target.name === "image"){
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // setImage(file);
+      setFormData({...formData, [e.target.name]: file});
+      setPreview(URL.createObjectURL(file)); // create preview URL
+    }
+    else{
+      setFormData({...formData, [e.target.name]: e.target.value});
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Logic to be added here
-    
-    console.log("User Signed Up:", formData);
-    Navigate("/")
+    const data = new FormData();
+    for (const key in formData) {
+      data.append(key, formData[key]);
+    }
+
+    dispatch(signUpAPI(data, navigate));
+    console.log("User going to Signed Up:", data);
+    navigate("/")
   };
 
   return (
@@ -31,8 +54,8 @@ export default function Signup() {
             <label className="block text-sm font-medium text-gray-700">Full Name</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="fullname"
+              value={formData.fullname}
               onChange={handleChange}
               required
               className="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-400"
@@ -49,6 +72,35 @@ export default function Signup() {
               required
               className="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
+
+          <div>
+            <label>
+              Upload Picture:
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleChange}
+              />
+            </label>
+            {preview && (
+              <div>
+                <img src={preview} alt="Preview"/>
+              </div>
+            )}
           </div>
 
           <div>

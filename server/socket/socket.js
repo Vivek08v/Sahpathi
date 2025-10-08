@@ -88,7 +88,7 @@ io.on('connection', (socket) => {
     })
 
     // join room preview
-    socket.on('joinRoomPreview', async ({ roomId, name, role = 'student'}, callback) => {
+    socket.on('joinRoomPreview', async ({ roomId, userDetail, role = 'student'}, callback) => {
         try {
             const room = roomsManager.getRoom(roomId);
 
@@ -103,31 +103,31 @@ io.on('connection', (socket) => {
                 role = 'student';
             }
 
-            const peer = room.addChatPeer(socket.id, name, role);
+            const peer = room.addChatPeer(socket.id, userDetail, role);
 
             console.log(roomId)
             socket.to(roomId).emit('newChatPeer', {
                 peerId: socket.id,
-                name, 
+                userDetail, 
                 role
             });
 
-            const roomObj = {
-              id: room.id,
-              title: room.title,
-              creatorId: room.creatorId,
-              teacher: room.teacher,
-              isTeacherAssigned: room.isTeacherAssigned,
-              peers: Array.from(room.peers.values()),
-              chatPeers: Array.from(room.chatPeers.values()),
-            };
+            // const roomObj = {
+            //   id: room.id,
+            //   title: room.title,
+            //   creatorId: room.creatorId,
+            //   teacher: room.teacher,
+            //   isTeacherAssigned: room.isTeacherAssigned,
+            //   peers: Array.from(room.peers.values()),
+            //   chatPeers: Array.from(room.chatPeers.values()),
+            // };
 
             // console.log("....................................")
             // console.log(roomObj)
             // console.log("....................................")
 
             callback({
-                roomData: roomObj,
+                roomData: room.toJSON2(),
             });
         }
         catch(error){
@@ -137,7 +137,7 @@ io.on('connection', (socket) => {
     });
 
 
-    socket.on('joinRoom', async ({ roomId, name, role = 'student'}, callback) => {
+    socket.on('joinRoom', async ({ roomId, userDetail, role = 'student'}, callback) => {
         try {
             const room = roomsManager.getRoom(roomId);
             if(!room) {
@@ -151,13 +151,14 @@ io.on('connection', (socket) => {
                 role = 'student';
             }
 
-            const peer = room.addPeer(socket.id, name, role);
+            const peer = room.addPeer(socket.id, userDetail, role);  // .fullname to be removed
 
             const routerRtpCapabilities = room.router.rtpCapabilities;
+            console.log("aeeeee",userDetail, peer)
 
             socket.to(roomId).emit('newPeer', {
                 peerId: socket.id,
-                name, 
+                userDetail, 
                 role
             });
 

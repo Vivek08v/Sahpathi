@@ -3,6 +3,32 @@ import { apiConnector } from "../apiConnector";
 
 const API_URL = 'http://localhost:4000/api/v1';
 
+export const signUpAPI = (data, navigate) => {
+    return async(dispatch) => {
+        try{
+            const {email, fullname, username, image, password} = data;
+            console.log("hii: ",email, fullname, username, password, image)
+            const signUpDetails = await apiConnector("POST", API_URL+`/signup`, data, {
+              headers: { "Content-Type": "multipart/form-data" },
+            });
+            console.log(signUpDetails);
+
+            if(!signUpDetails.data.success){
+                console.log("Error in log In")
+                throw new Error("Error in log In")
+            }
+
+            dispatch(setUser(signUpDetails.data.data))
+            dispatch(setAuthenticated(true));
+            navigate("/classrooms")
+        }
+        catch(error){
+          console.log("Error occured while logging In: ", error);
+        }
+    }
+}
+
+
 export const logInAPI = (data, navigate) => {
     return async(dispatch) => {
         try{
