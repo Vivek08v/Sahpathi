@@ -23,6 +23,18 @@ export const userSlice = createSlice({
     setAuthenticated: (state, action) => {
       state.isAuthenticated = action.payload;
     },
+    addFollower : (state, action) => {
+
+    },
+    addFollowing : (state, action) => {  // also removes
+        const { to, toFollow } = action.payload;
+        if(toFollow) state.user.following.push(to);
+        else state.user.following = state.user.following.filter((flow) => flow !== to);
+        console.log(action.payload);
+    },
+    addToFollowBackList : (state, action) => {
+
+    },
     clearUser: (state) => {
       state.user = null;
       state.isAuthenticated = false;
@@ -34,5 +46,7 @@ export const userSlice = createSlice({
   },
 });
 
-export const { setUser, setAuthenticated, setInitialized, clearUser, setLoading } = userSlice.actions;
+export const { setUser, setAuthenticated, setInitialized, clearUser, setLoading,
+               addFollower, addFollowing, addToFollowBackList
+ } = userSlice.actions;
 export default userSlice.reducer;

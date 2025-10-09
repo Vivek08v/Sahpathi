@@ -5,6 +5,7 @@ import {app, server} from './socket/socket.js';
 import connectDB from './config/database.js';
 import roomRoutes from "./routes/rooms.route.js"
 import authRoutes from "./routes/auth.route.js"
+import profileRoutes from "./routes/profile.route.js"
 // const app = express();
 
 connectDB();
@@ -22,6 +23,7 @@ app.use(
 // routes
 app.use("/api/v1", roomRoutes);
 app.use("/api/v1", authRoutes);
+app.use("/api/v1", profileRoutes);
 app.get("/", (req, res)=>{
     res.json({
         success: true,

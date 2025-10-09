@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
         average: { type: Number, default: 0 },
         count: { type: Number, default: 0 }
     },
-    friendRequests: [
+    followBackList: [
         {
             from: { 
                 type: mongoose.Schema.Types.ObjectId, 

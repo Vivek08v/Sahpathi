@@ -15,6 +15,7 @@ import { initAuth } from './services/operations/auth.service'
 import ProtectedRoute from './components/ProtectedRoute'
 import CreateClass from './components/CreateClass'
 import RoomPreview from './pages/RoomPreview'
+import { Profile } from './pages/Profile'
 
 function App() {
   const dispatch = useDispatch();
@@ -73,6 +74,7 @@ function App() {
           <Route path='/profile' element={<Profile/>}/> */}
           <Route path='/login' element={<Login/>}/>
           <Route path='/signup' element={<Signup/>}/>
+          <Route path='/profile/:userId' element={<ProtectedRoute> <Profile/> </ProtectedRoute>}/>
 
           <Route path='/room/preview/:roomId' element={<ProtectedRoute> <RoomPreview/> </ProtectedRoute>}/>
           <Route path='/room/:roomId' element={<ProtectedRoute> <Room/> </ProtectedRoute>}/>

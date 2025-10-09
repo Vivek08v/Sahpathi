@@ -8,6 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { roomSlice } from "../redux/slices/roomSlice";
 import Chatbox from "../components/Chatbox";
+import ProfilePopUp from "../components/ProfilePopUp";
 
 const Room = () => {
   const { roomId } = useParams();
@@ -18,6 +19,8 @@ const Room = () => {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [peersVideoOn, setIsPeersVideoOn] = useState(null);
   const { user } = useSelector((state) => state.userSlice);
+  const [activePeerId, setActivePeerId] = useState(null);
+
 
   const localStreamRef = useRef(null);
 
@@ -45,6 +48,11 @@ const Room = () => {
       }
     }
   };
+
+  const userPopUpHandler = (peerId) => {
+    setActivePeerId((prev) => (prev === peerId ? null : peerId)); // toggle
+  };
+
   
   const classEndHandler = async () => {
     try {
@@ -56,7 +64,7 @@ const Room = () => {
 
   useEffect(() => {
     const join = async () => {
-      const currUser = {"fullname": user.fullname, "userId": user._id, "username": user.username}
+      const currUser = {"fullname": user.fullname, "userId": user._id, "username": user.username, "image": user.avatar}
       console.log(currUser)
       try {
         console.log("Joining room:", roomId, role);
@@ -179,7 +187,18 @@ const Room = () => {
                       {isVideoOff ? <FaVideoSlash/> : <FaVideo />}
                     </div>
                   </div>
-                  <div>{user.fullname} {"["+role+"]"}</div>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <img
+                        src={user.avatar || "/default-profile.png"} // fallback dummy image
+                        alt={`${user.fullname}'s profile`}
+                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-300"
+                      />
+                    </div>
+                    <div className="text-sm font-medium">
+                      {user.fullname} [{role}]
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -200,10 +219,27 @@ const Room = () => {
                     <VideoPlayer key={peer.id} stream={stream} muted={false} /> : 
                     <>Video is Off</>
                   }
-                  
-                  <div className="w-full bg-red-200 flex justify-between items-center gap-2 rounded-b px-2 py-1">
-                    <div>{peer?.userDetail?.fullname} {"["+peer.role+"]"}</div>
+                  <div className="relative">
+                  <div className="w-full bg-red-200 justify-between rounded-b px-2 py-1 flex items-center gap-2"
+                       onClick={() => userPopUpHandler(peer.id)}>
+                    <div>
+                      <img
+                        src={peer?.userDetail?.image || "/default-profile.png"} // fallback dummy image
+                        alt={`${peer?.userDetail?.image}'s profile`}
+                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-300"
+                      />
+                    </div>
+                    <div className="text-sm font-medium">
+                      {peer?.userDetail?.fullname} [{peer.role}]
+                    </div>
                   </div>
+
+                  {/* === Popup === */}
+                  {activePeerId === peer.id && (
+                    <ProfilePopUp peer={peer}/>
+                  )}
+
+                </div>
                 </div>
               </div>
             )
