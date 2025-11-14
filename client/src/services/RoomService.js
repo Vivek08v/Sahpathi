@@ -44,6 +44,19 @@ const RoomService = {
       console.error('Error creating room:', error);
       throw error;
     }
+  },
+
+  scheduleRoomAPI: async(data) => {
+    try{
+      const response = await apiConnector("PATCH", `${API_URL}/schedule-room`, data);
+
+      console.log("response from API: ", response.data);
+      return response.data.data;
+    }
+    catch(error){
+      console.error('Error scheduling room:', error);
+      throw error;
+    }
   }
 };
 

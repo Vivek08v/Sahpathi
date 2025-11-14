@@ -131,3 +131,39 @@ export const createRoom = async(req, res) => {
         })
     }
 }
+
+export const scheduleRoom = async(req, res) => {
+    try{
+        const {roomId ,timeAndDate} = req.body;
+        console.log(timeAndDate);
+
+        const room = await Classroom.findById(roomId);
+        if(!room){
+            return res.status(404).json({ 
+                success: false,
+                message: "Room not found" 
+            });
+        }
+        
+        if(!room.schedule){
+            room.schedule = {}
+        }
+        room.schedule.startedAt = new Date();
+        room.schedule.scheduledAt = new Date(timeAndDate);
+        room.status = "Scheduled";
+        console.log(room);
+        await room.save();
+
+        return res.status(200).json({
+            data: room,
+            success: true,
+            message: "API Success: Room Scheduled Successfully"
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            success: false,
+            message: "API Failed: Room Not Scheduled"
+        })
+    }
+}

@@ -17,6 +17,8 @@ const RoomPreview = () => {
   const [chats, setChats] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [timeAndDate, setTimeAndDate] = useState("");
+  const [schedulerWindow, setSchedulerWindow] = useState(false);
 
   const [form, setForm] = useState({message: ""});
   const msgHandler = (e) => {
@@ -61,6 +63,16 @@ const RoomPreview = () => {
     await MediasoupClient.leaveRoomPreview();
     setPeers([]);
     setPage(1);
+  }
+
+  const scheduleTimeAndDate = async() => {
+    // schedule API call
+    const payload = {
+      timeAndDate,
+      roomId : room._id
+    }
+    const response = await RoomService.scheduleRoomAPI(payload);
+    console.log("Room Scheduled at: ",response);
   }
 
   // useEffect(()=>{
@@ -202,8 +214,36 @@ const RoomPreview = () => {
           >
             Leave
           </button>
+          <button
+            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-semibold transition"
+            onClick={() => {}}
+          >
+            Remind Me (Store room in Redux)
+          </button>
+          {room.createdBy._id === user._id && <button
+            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-semibold transition"
+            onClick={() => {setSchedulerWindow(prev => !prev)}}
+          >
+            Schedule
+          </button>}
+        </div>
+
+      </div>}
+
+
+      {schedulerWindow && <div>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-gray-700">Select Date & Time</label>
+          <input
+            type="datetime-local"
+            value={timeAndDate}
+            onChange={(e) => setTimeAndDate(e.target.value)}
+            className="border px-3 py-2 rounded-md shadow-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+          />
+          <button onClick={scheduleTimeAndDate}>Set</button>
         </div>
       </div>}
+
     </div>
   )
 }
