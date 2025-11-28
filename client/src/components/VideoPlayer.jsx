@@ -23,7 +23,7 @@ const VideoPlayer = ({ stream, muted = false }) => {
       autoPlay
       playsInline
       muted={muted}
-      className="w-full h-48 bg-black rounded-t"
+      className="w-full h-full object-cover"
     />
   );
 };

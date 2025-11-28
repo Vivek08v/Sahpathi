@@ -148,8 +148,8 @@ export const scheduleRoom = async(req, res) => {
         if(!room.schedule){
             room.schedule = {}
         }
-        room.schedule.startedAt = new Date();
-        room.schedule.scheduledAt = new Date(timeAndDate);
+        room.schedule.scheduledAt = new Date();
+        room.schedule.startedAt = new Date(timeAndDate);
         room.status = "Scheduled";
         console.log(room);
         await room.save();

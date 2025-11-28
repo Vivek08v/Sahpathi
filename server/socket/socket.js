@@ -4,7 +4,7 @@ import express from "express";
 import { v4 as uuidv4} from 'uuid';
 
 import roomsManager from "../mediasoup/RoomsManager.js";
-import { Classroom } from "../models/classroom.model.js";
+import RoomService from "../mediasoup/RoomService.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -53,6 +53,11 @@ io.on('connection', (socket) => {
             room.removePeer(socket.id);
             socket.leave(roomId);
             socket.to(roomId).emit('peerClosed', { peerId: socket.id });
+
+            const waslast = room.peers.size === 0;
+            if(waslast){
+                await RoomService.changeRoomStatusToCompleted(roomId);
+            }
 
             // if (room.isRoomEmpty()) {
             //     await Classroom.findOneAndUpdate({ classId: roomId}, {$set: {status: "Completed"}})
@@ -152,6 +157,11 @@ io.on('connection', (socket) => {
             }
 
             const peer = room.addPeer(socket.id, userDetail, role);  // .fullname to be removed
+
+            const wasEmpty = room.peers.size === 1;
+            if(wasEmpty){
+                await RoomService.changeRoomStatusToOngoing(roomId);
+            }
 
             const routerRtpCapabilities = room.router.rtpCapabilities;
             console.log("aeeeee",userDetail, peer)

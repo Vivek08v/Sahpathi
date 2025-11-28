@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BsFillMicMuteFill, BsFillMicFill } from "react-icons/bs";
-import { FaVideoSlash, FaVideo } from "react-icons/fa";
+import { FaVideo, FaVideoSlash, FaTimes } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import VideoPlayer from "../components/VideoPlayer";
 import MediasoupClient from "../services/MediasoupClient";
@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { roomSlice } from "../redux/slices/roomSlice";
 import Chatbox from "../components/Chatbox";
 import ProfilePopUp from "../components/ProfilePopUp";
+import ParticipantsList from "../components/ParticipantsList";
 
 const Room = () => {
   const { roomId } = useParams();
@@ -20,6 +21,10 @@ const Room = () => {
   const [peersVideoOn, setIsPeersVideoOn] = useState(null);
   const { user } = useSelector((state) => state.userSlice);
   const [activePeerId, setActivePeerId] = useState(null);
+
+  const [showChat, setShowChat] = useState(true);
+  const [showParticipants, setShowParticipants] = useState(true);
+
 
 
   const localStreamRef = useRef(null);
@@ -157,101 +162,181 @@ const Room = () => {
   }, [roomId, isInitialized]);
 
   return (
-    <div className="flex-col flex-wrap">
-      <div className="w-full flex justify-around bg-green-200">
-        <div>Room-Id: {roomId}</div>
-        <div className="bg-red-600 border-2 rounded">
-          <button onClick={classEndHandler}>Leave Class</button>
-        </div>
+  <div className="flex flex-col h-screen bg-gray-950 text-gray-100">
+
+    {/* 🔹 1. Sleek Header */}
+    <div className="h-14 flex justify-between items-center px-4 bg-gray-900/80 backdrop-blur-lg border-b border-gray-800 shadow-lg">
+      <div className="text-sm font-medium text-gray-300">
+        Room ID: <span className="text-white font-semibold">{roomId}</span>
       </div>
 
-      <div className="flex">
-        <div className="flex basis-2/3">
-        {/* {console.log(peersVideoOn)} */}
-          
-          {/* local Stream */}
-          {localStream && 
-            <div className="p-2 bg-gray-200">
-              <div className="w-full">
-                {!isVideoOff ? 
-                  <VideoPlayer stream={localStream} muted={false} /> : 
-                  <>Video is Off</>
-                }
-                
-                <div className="w-full bg-red-200 flex justify-between items-center gap-2 rounded-b px-2 py-1">
-                  <div className="bg-blue-300 flex gap-2 px-2 py-1 rounded">
-                    <div onClick={toggleMute}>
-                      {isMuted ? <BsFillMicMuteFill/> : <BsFillMicFill />}
-                    </div>
-                    <div onClick={toggleVideo}>
-                      {isVideoOff ? <FaVideoSlash/> : <FaVideo />}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <img
-                        src={user.avatar || "/default-profile.png"} // fallback dummy image
-                        alt={`${user.fullname}'s profile`}
-                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-300"
-                      />
-                    </div>
-                    <div className="text-sm font-medium">
-                      {user.fullname} [{role}]
-                    </div>
-                  </div>
+      <div className="flex gap-3">
+        {/* Tabs */}
+        <button
+          onClick={() => { setShowParticipants(!showParticipants); setShowChat(false); }}
+          className={`px-4 py-1.5 text-sm rounded-lg transition-all shadow-sm
+            ${showParticipants 
+              ? "bg-gray-700 text-white" 
+              : "text-gray-400 hover:text-white hover:bg-gray-800/60"}`}
+        >
+          Participants
+        </button>
+
+        <button
+          onClick={() => { setShowChat(!showChat); setShowParticipants(false); }}
+          className={`px-4 py-1.5 text-sm rounded-lg transition-all shadow-sm
+            ${showChat 
+              ? "bg-gray-700 text-white" 
+              : "text-gray-400 hover:text-white hover:bg-gray-800/60"}`}
+        >
+          Chat
+        </button>
+
+        <button
+          onClick={classEndHandler}
+          className="bg-red-600 hover:bg-red-700 px-4 py-1.5 text-sm rounded-lg shadow-md transition"
+        >
+          Leave
+        </button>
+      </div>
+    </div>
+
+    {/* 🔹 2. Main Section */}
+    <div className="flex flex-1 overflow-hidden relative">
+
+      {/* Video Grid */}
+      <div className="flex-1 overflow-y-auto p-5 bg-black">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {/* === Local User Video Card === */}
+          {localStream && (
+            <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-800 border border-gray-700 shadow-xl transition hover:shadow-2xl">
+
+              {/* Video */}
+              {!isVideoOff ? (
+                <VideoPlayer stream={localStream} muted={false} />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                  Video Off
+                </div>
+              )}
+
+              {/* Overlay */}
+              <div className="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent px-3 py-2 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={user.avatar || "/default-profile.png"} 
+                    className="w-7 h-7 rounded-full object-cover border border-gray-500 shadow-md"
+                  />
+                  <span className="text-sm font-semibold">You</span>
+                </div>
+
+                <div className="flex gap-3 text-gray-300">
+                  <button onClick={toggleMute} className="hover:text-white transition">
+                    {isMuted ? <BsFillMicMuteFill className="text-red-500" /> : <BsFillMicFill />}
+                  </button>
+
+                  <button onClick={toggleVideo} className="hover:text-white transition">
+                    {isVideoOff ? <FaVideoSlash className="text-red-500" /> : <FaVideo />}
+                  </button>
                 </div>
               </div>
             </div>
-          }
-          {console.log(MediasoupClient.peers)}
-          {Array.from(MediasoupClient.peers.values()).map((peer, i) => {
-            // local Stream
-            if(peer.id === MediasoupClient.peerId){
-              return;
-            }
-            console.log(peer)
+          )}
+
+          {/* === Remote Peers === */}
+          {Array.from(MediasoupClient.peers.values()).map((peer) => {
+            if (peer.id === MediasoupClient.peerId) return null;
+
             const stream = remoteStreams[peer.id]?.stream;
 
             return (
-              <div className="p-2 bg-gray-200" key={i}>
-                <div className="w-full">
-                  {(peersVideoOn && peersVideoOn[peer.id]) ? 
-                    <VideoPlayer key={peer.id} stream={stream} muted={false} /> : 
-                    <>Video is Off</>
-                  }
-                  <div className="relative">
-                  <div className="w-full bg-red-200 justify-between rounded-b px-2 py-1 flex items-center gap-2"
-                       onClick={() => userPopUpHandler(peer.id)}>
-                    <div>
-                      <img
-                        src={peer?.userDetail?.image || "/default-profile.png"} // fallback dummy image
-                        alt={`${peer?.userDetail?.image}'s profile`}
-                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-300"
-                      />
-                    </div>
-                    <div className="text-sm font-medium">
-                      {peer?.userDetail?.fullname} [{peer.role}]
-                    </div>
+              <div 
+                key={peer.id} 
+                className="relative aspect-video rounded-2xl overflow-hidden bg-gray-800 border border-gray-700 shadow-xl transition hover:shadow-2xl"
+              >
+                
+                {peersVideoOn?.[peer.id] ? (
+                  <VideoPlayer stream={stream} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                    Video Off
+                  </div>
+                )}
+
+                {/* Overlay */}
+                <div
+                  onClick={() => userPopUpHandler(peer.id)}
+                  className="absolute bottom-0 w-full cursor-pointer bg-gradient-to-t from-black/70 to-transparent px-3 py-2 flex justify-between items-center hover:from-black/85 transition"
+                >
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <img
+                      src={peer?.userDetail?.image || "/default-profile.png"}
+                      className="w-7 h-7 rounded-full object-cover border border-gray-500 shadow-md"
+                    />
+                    <span className="text-sm font-semibold truncate">
+                      {peer?.userDetail?.fullname}
+                    </span>
                   </div>
 
-                  {/* === Popup === */}
-                  {activePeerId === peer.id && (
-                    <ProfilePopUp peer={peer}/>
-                  )}
+                  <span className="text-xs bg-gray-700/80 px-2 py-0.5 rounded-md border border-gray-600 text-gray-300">
+                    {peer.role}
+                  </span>
+                </div>
 
-                </div>
-                </div>
+                {activePeerId === peer.id && <ProfilePopUp peer={peer} />}
               </div>
-            )
+            );
           })}
         </div>
-
-        <div className="bg-gray-200 basis-1/3 border-2 rounded">
-          <Chatbox/>
-        </div>
       </div>
+
+      {/* 🔹 3. Sidebar */}
+      {/* 🔹 3. Sidebar */}
+{(showParticipants || showChat) && (
+  <div className="w-80 bg-gray-900/95 backdrop-blur-xl border-l border-gray-800 flex flex-col shadow-2xl">
+
+    {/* Header */}
+    <div className="flex items-center justify-between px-4 py-4 border-b border-gray-800 bg-gray-900/60 backdrop-blur">
+      <span className="font-semibold text-gray-100 text-lg tracking-wide">
+        {showParticipants ? "Participants" : "Chat"}
+      </span>
+
+      <button 
+        onClick={() => { setShowParticipants(false); setShowChat(false); }}
+        className="text-gray-400 hover:text-white hover:scale-110 transition"
+      >
+        <FaTimes size={18} />
+      </button>
     </div>
-  );
+
+    {/* Content */}
+    <div className="
+      flex-1 overflow-y-auto p-4 space-y-3 
+      text-gray-200 
+      scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent
+    ">
+      {showParticipants && (
+        <div className="bg-gray-850/40 p-3 rounded-xl border border-gray-800 shadow-inner">
+          <ParticipantsList peers={MediasoupClient.peers} />
+        </div>
+      )}
+
+      {showChat && (
+        <div className="bg-gray-850/40 p-3 rounded-xl border border-gray-800 shadow-inner">
+          <Chatbox />
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
+
+    </div>
+  </div>
+);
+
 };
 
 export default Room;
